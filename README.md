@@ -33,6 +33,8 @@ EventAggregator.Subscribe<MyEventType>(MyMethodName)
 
 Events are defined by a custom class, which can hold additional data. The class needs to implement the `IEventBase` interface. You can extend, inherit and derive from this class as you want as long as it implements the interface.
 
+You can add your custom classes to the `Events.cs` file to keep things organized.
+
 #### a. Create your own class
 
 ```C#
@@ -70,4 +72,16 @@ private void MyMethodName(IEventData eventData)
         // Do whatever you want with your data
     }
 }
+```
+
+### 4. Miscellaneous
+
+You can unsubscribe from any event at anytime by calling:
+```C#
+EventAggregator.Unsubscribe<MyEventType>(MyMethodName);
+```
+
+You can check if your event is correctly registered by calling:
+```C#
+bool b = EventAggregator.IsRegistered<MyEventType>(MyMethodName);
 ```
