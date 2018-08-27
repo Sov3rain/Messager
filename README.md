@@ -1,4 +1,4 @@
-# Unity-Event-Aggregator
+# Unity Event Aggregator
 
 ## About
 
@@ -11,11 +11,13 @@ In every project that is event heavy or when you need to decouple your publisher
 ## How to use it
 
 import the namespace:  
-`using EventAggregation;`
+```C#
+using EventAggregation;
+```
 
 You can get access to the EventAggregator at anytime by just typing `EventAggregator`.
 
-### 1. Creating a new event
+### 1. Publish an event
 
 When you need to publish an event:  
 ```C#
@@ -84,4 +86,14 @@ EventAggregator.Unsubscribe<MyEventType>(MyMethodName);
 You can check if your event is correctly registered by calling:
 ```C#
 bool b = EventAggregator.IsRegistered<MyEventType>(MyMethodName);
+```
+
+You can delete all the subscribers by calling:
+```C#
+EventAggregator.UnsubscribeAll();
+```
+
+You can delete all the subscribers from a designated type by calling:
+```C#
+EventAggregator.UnsubscribeAll<MyEventType>();
 ```
