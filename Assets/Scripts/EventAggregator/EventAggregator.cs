@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace EventAggregation
 {
@@ -38,9 +40,12 @@ namespace EventAggregation
             }
         }
 
-        public static void UnsubscribeAll<T>()
+        public static void UnsubscribeAll<T>() where T : class
         {
-            _listeners[typeof(T)].Clear();
+            if (_listeners.ContainsKey(typeof(T)))
+            {
+                _listeners.Remove(typeof(T));
+            }
         }
 
         public static void UnsubscribeAll()
@@ -61,5 +66,18 @@ namespace EventAggregation
             }
             return false;
         }
-    } 
+
+        public static void PrintInfo()
+        {
+            string s;
+            var sb = new StringBuilder();
+
+            foreach (var entry in _listeners)
+            {
+                s = string.Format("Event: {0} -> {1} listeners\n", entry.Key, entry.Value.Count);
+                sb.Append(s);
+            }
+            Debug.Log(sb.ToString());
+        }
+    }
 }
