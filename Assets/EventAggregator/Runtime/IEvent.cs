@@ -1,4 +1,1 @@
-public interface IEvent
-{
-
-}
+public interface IEvent { }

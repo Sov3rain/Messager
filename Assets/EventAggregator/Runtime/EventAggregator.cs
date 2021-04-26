@@ -7,7 +7,7 @@ namespace EventAggregation
     {
         private static EventAggregator _instance;
 
-        public static EventAggregator Instance
+        public static EventAggregator DefaultInstance
         {
             get
             {
@@ -28,20 +28,20 @@ namespace EventAggregation
 
         public void AddListener<T>(Action<IEvent> action) where T : IEvent
         {
-            if (!_listeners.ContainsKey(typeof(T)))
+            if (!HasListener<T>())
             {
-                _listeners.Add(typeof(T), new HashSet<Action<IEvent>>());
+                AddNewListenerType<T>();
             }
-            _listeners[typeof(T)].Add(action);
+            GetListeners<T>().Add(action);
         }
 
         public void RemoveListener<T>(Action<IEvent> action) where T : IEvent
         {
-            if (!_listeners.ContainsKey(typeof(T)))
+            if (!HasListener<T>())
             {
                 return;
             }
-            _listeners[typeof(T)].Remove(action);
+            GetListeners<T>().Remove(action);
         }
 
         public void Dispatch<T>() where T : IEvent
@@ -51,7 +51,7 @@ namespace EventAggregation
 
         public void Dispatch<T>(T eventData) where T : IEvent
         {
-            HashSet<Action<IEvent>> listeners = GetListeners<T>();
+            HashSet<Action<IEvent>> listeners = GetListeners<T>(copy: true);
 
             if (listeners is null)
             {
@@ -64,13 +64,24 @@ namespace EventAggregation
             }
         }
 
-        private HashSet<Action<IEvent>> GetListeners<T>()
+        private void AddNewListenerType<T>() where T : IEvent
+        {
+            _listeners.Add(typeof(T), new HashSet<Action<IEvent>>());
+        }
+
+        private HashSet<Action<IEvent>> GetListeners<T>(bool copy = false)
         {
             if (_listeners.TryGetValue(typeof(T), out var listeners))
             {
-                return new HashSet<Action<IEvent>>(listeners);
+                if (copy)
+                {
+                    return new HashSet<Action<IEvent>>(listeners);
+                }
+                return listeners;
             }
             return null;
         }
+
+        private bool HasListener<T>() => _listeners.ContainsKey(typeof(T));
     }
 }
