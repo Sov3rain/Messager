@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "displayName": "Event Aggregator",
     "description": "Event Aggregator is a simple messaging system for Unity.",
+    "documentationUrl": "https://github.com/Sov3rain/Unity-Event-Aggregator",
     "unity": "2019.4",
     "dependencies": {},
     "keywords": [
