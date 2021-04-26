@@ -10,8 +10,13 @@
         "messaging"
     ],
     "author": {
-        "name": "Samuel Duval",
+        "name": "Sov3rain",
         "email": "duvalsamuel@pm.me",
         "url": "https://samuelduval.fr"
-    }
+    },
+    "samples": [{
+        "displayName": "Demo",
+        "description": "Demo of Event Aggregator",
+        "path": "Samples~/Demo"
+    }]
 }
