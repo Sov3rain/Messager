@@ -2,28 +2,31 @@
 using EventAggregation;
 using UnityEngine;
 
-public class Pong : MonoBehaviour
+namespace Soverain.Examples
 {
-    EventAggregator _eventAggregator;
-
-    void Start()
+    public class Pong : MonoBehaviour
     {
-        _eventAggregator = EventAggregator.DefaultInstance;
-        _eventAggregator.AddListener<OnPing>(OnPingHandler);
+        EventAggregator _eventAggregator;
+
+        void Start()
+        {
+            _eventAggregator = EventAggregator.DefaultInstance;
+            _eventAggregator.AddListener<OnPing>(OnPingHandler);
+        }
+
+        private void OnPingHandler(IEvent obj)
+        {
+            var eventData = obj as OnPing;
+            StartCoroutine(DoResponse(eventData));
+        }
+
+        private IEnumerator DoResponse(OnPing eventData)
+        {
+            Debug.Log($"Receive ping! message: {eventData?.message}", this);
+            yield return new WaitForSeconds(1);
+            _eventAggregator.Dispatch<OnPong>();
+        }
     }
 
-    private void OnPingHandler(IEvent obj)
-    {
-        var eventData = obj as OnPing;
-        StartCoroutine(DoResponse(eventData));
-    }
-
-    private IEnumerator DoResponse(OnPing eventData)
-    {
-        Debug.Log($"Receive ping! message: {eventData?.message}", this);
-        yield return new WaitForSeconds(1);
-        _eventAggregator.Dispatch<OnPong>();
-    }
+    public class OnPong : IEvent { }
 }
-
-public class OnPong : IEvent { }
