@@ -1,1 +1,4 @@
-public interface IEvent { }
+namespace EventAggregation
+{
+    public interface IEvent { }
+}
