@@ -1,6 +1,6 @@
 {
     "name": "com.soverain.event-aggregator",
-    "version": "2.0.0-preview.1",
+    "version": "2.0.0",
     "displayName": "Event Aggregator",
     "description": "Event Aggregator is a simple messaging system for Unity.",
     "documentationUrl": "https://github.com/Sov3rain/Unity-Event-Aggregator",
@@ -8,7 +8,12 @@
     "dependencies": {},
     "keywords": [
         "events",
-        "messaging"
+        "messaging",
+        "observer",
+        "pattern",
+        "publisher",
+        "subscriber",
+        "event-driven"
     ],
     "author": {
         "name": "Sov3rain",
@@ -17,7 +22,7 @@
     },
     "samples": [{
         "displayName": "Demo",
-        "description": "Demo of Event Aggregator",
+        "description": "Examples of Event Aggregator",
         "path": "Samples~/Demo"
     }]
 }
