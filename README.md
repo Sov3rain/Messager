@@ -1,6 +1,6 @@
 # Event Aggregator
 
-![version](https://img.shields.io/github/v/tag/Sov3rain/Unity-Event-Aggregator?label=latest) ![unity-version](https://img.shields.io/badge/Unity-2019.4%2B-lightgrey) ![licence](https://img.shields.io/github/license/Sov3rain/Unity-Event-Aggregator)
+![version](https://img.shields.io/github/v/tag/Sov3rain/Unity-Event-Aggregator?label=latest) ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
 
 This implementation of the Event Aggregator pattern tries to overcome the limitations of traditional event handling by providing a central place to publish and subscribe for events. It takes care of registering, unregistering and invoking events and thus decoupling publishers and subscribers.
 
