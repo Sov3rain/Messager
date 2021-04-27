@@ -1,0 +1,1 @@
+# ⚠️ This branch is the packaged version of the project. For the full documentation and source code, see the [base repository](https://github.com/Sov3rain/Unity-Event-Aggregator)
