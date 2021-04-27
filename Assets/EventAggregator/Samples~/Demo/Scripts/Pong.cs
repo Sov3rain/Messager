@@ -1,8 +1,7 @@
 ﻿using System.Collections;
-using EventAggregation;
 using UnityEngine;
 
-namespace Soverain.Examples
+namespace EventAggregation.Examples
 {
     public class Pong : MonoBehaviour
     {

@@ -1,8 +1,7 @@
 ﻿using System.Collections;
-using EventAggregation;
 using UnityEngine;
 
-namespace Soverain.Examples
+namespace EventAggregation.Examples
 {
     public class Ping : MonoBehaviour
     {
@@ -15,6 +14,11 @@ namespace Soverain.Examples
             _eventAggregator.Dispatch<OnPing>();
         }
 
+        void OnDestroy()
+        {
+            _eventAggregator.RemoveListener<OnPong>(OnPongHandler);
+        }
+
         private void OnPongHandler(IEvent obj)
         {
             StartCoroutine(DoResponse());
@@ -25,6 +29,7 @@ namespace Soverain.Examples
             Debug.Log("Receive pong!", this);
             yield return new WaitForSeconds(1);
             _eventAggregator.Dispatch(new OnPing { message = "Hello World!" });
+            Destroy(gameObject);
         }
     }
 
