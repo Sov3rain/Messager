@@ -21,7 +21,7 @@ Add this dependency to the `dependencies` section of your `Packages/manifest.jso
 You can also add it via the Package Manager window under `Add -> Add package from git URL...` and paste in the url part above.
 
 ## Usage
-#### Create an event
+### Create an event
 
 Events are just plain C# classes that implements the `IEvent` interface.
 
@@ -36,7 +36,7 @@ public class OnTestEventWithData : IEvent
 }
 ```
 
-#### Get a reference of the Event Aggregator
+### Get a reference of the Event Aggregator
 
 You can get a direct reference in any part of your code by accessing the default global static instance, or instantiate your own.
 
@@ -48,7 +48,7 @@ var eventAggregator = EventAggregator.DefaultInstance;
 public EventAggregator eventAggregator = new EventAggregator();
 ```
 
-#### Dispatch an event
+### Dispatch an event
 
 You can dispatch an event by using the `Dispatch` method. You can dispatch an event with or without data.
 
@@ -60,7 +60,7 @@ eventAggregator.Dispatch<OnTestEvent>();
 eventAggregator.Dispatch(new OnTestEventWithData { number = 42 });
 ```
 
-#### Add and remove listeners
+### Add and remove listeners
 
 You can add or remove listeners by using the given methods. Remember to always remove a listener upon object destruction to avoid memory leaks and exceptions.
 
