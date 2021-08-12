@@ -11,9 +11,9 @@
     "messaging"
   ],
   "samples": [{
-    "displayName": "Demo",
-    "description": "Examples of Event Aggregator",
-    "path": "Samples~/Demo"
+    "displayName": "Demos",
+    "description": "Demos of Messenger",
+    "path": "Samples~/Demos"
   }],
   "dependencies": {},
   "license": "MIT"
