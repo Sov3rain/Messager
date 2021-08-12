@@ -1,0 +1,20 @@
+{
+  "name": "com.soverain.unity-messenger",
+  "version": "3.0.0",
+  "displayName": "Messenger",
+  "description": "Messenger is a simple messaging system for Unity.",
+  "documentationUrl": "https://github.com/Sov3rain/Unity-Event-Aggregator",
+  "unity": "2019.4",
+  "keywords": [
+    "unity",
+    "events",
+    "messaging"
+  ],
+  "samples": [{
+    "displayName": "Demo",
+    "description": "Examples of Event Aggregator",
+    "path": "Samples~/Demo"
+  }],
+  "dependencies": {},
+  "license": "MIT"
+}
