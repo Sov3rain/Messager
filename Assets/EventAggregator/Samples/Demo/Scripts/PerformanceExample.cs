@@ -26,7 +26,7 @@ public class PerformanceExample : MonoBehaviour
         watch.Start();
         messenger.Dispatch(new WatchedMessage());
         watch.Stop();
-        Debug.Log($"Execution time for {count} elements: {watch.ElapsedMilliseconds} ms");
+        Debug.Log($"Execution time for {listenersMessage.Count} elements: {watch.ElapsedMilliseconds} ms");
     }
 
     [ContextMenu("Benchmark Actions")]
@@ -41,7 +41,7 @@ public class PerformanceExample : MonoBehaviour
         watch.Start();
         TestAction();
         watch.Stop();
-        Debug.Log($"Execution time for {count} elements: {watch.ElapsedMilliseconds} ms");
+        Debug.Log($"Execution time for {listenersAction.Count} elements: {watch.ElapsedMilliseconds} ms");
     }
 }
 
