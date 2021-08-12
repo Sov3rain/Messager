@@ -24,12 +24,8 @@ namespace Messaging
             "for '{1}' messages. Clear your listeners upon object destruction " +
             "by calling Cut().";
 
-        private readonly Dictionary<Type, HashSet<Message>> _messages;
-
-        public Messenger()
-        {
-            _messages = new Dictionary<Type, HashSet<Message>>();
-        }
+        private readonly Dictionary<Type, HashSet<Message>> _messages
+            = new Dictionary<Type, HashSet<Message>>();
 
         public void Listen<T>(object owner, params Action<T>[] handlers)
         {

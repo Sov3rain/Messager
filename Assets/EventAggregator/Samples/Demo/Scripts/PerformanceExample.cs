@@ -9,7 +9,7 @@ public class PerformanceExample : MonoBehaviour
 
     public int count = 1000;
 
-    private List<TestListener> listeners = new List<TestListener>();
+    private List<TestListener> listenersMessage = new List<TestListener>();
     private List<TestAction> listenersAction = new List<TestAction>();
 
     private readonly Messenger messenger = Messenger.DefaultInstance;
@@ -19,7 +19,7 @@ public class PerformanceExample : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
-            listeners.Add(new TestListener(messenger));
+            listenersMessage.Add(new TestListener(messenger));
         }
         Debug.Log("Start watching messages...");
         var watch = new System.Diagnostics.Stopwatch();
