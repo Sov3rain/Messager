@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Messaging
 {
@@ -17,6 +18,11 @@ namespace Messaging
             }
         }
         static private Messenger _instance;
+
+        private const string NULL_LISTENER_WARNING =
+            "Messenger: destroyed references of '{0}' are still registered " +
+            "for '{1}' messages. Clear your listeners upon object destruction " +
+            "by calling Cut().";
 
         private readonly Dictionary<Type, HashSet<Message>> _messages;
 
@@ -44,11 +50,6 @@ namespace Messaging
             else _messages[typeof(T)].RemoveWhere(o => o.Owner == owner);
         }
 
-        public void Dispatch<T>() where T : class
-        {
-            Dispatch(default(T));
-        }
-
         public void Dispatch<T>(T payload) where T : class
         {
             HashSet<Action<T>> actions = GetActionsFrom<T>();
@@ -66,16 +67,24 @@ namespace Messaging
 
         private HashSet<Action<T>> GetActionsFrom<T>()
         {
+            var actions = new HashSet<Action<T>>();
             if (_messages.TryGetValue(typeof(T), out HashSet<Message> msgs))
             {
-                var actions = new HashSet<Action<T>>();
-                foreach (var msg in msgs)
+                foreach (Message msg in msgs)
                 {
-                    actions.Add(Convert<T>(msg.Action));
+                    if (msg.Owner.Equals(null))
+                    {
+                        Debug.LogWarning(string.Format(
+                            NULL_LISTENER_WARNING,
+                            msg.Owner.GetType(),
+                            typeof(T)
+                        ));
+                        continue;
+                    }
+                    else actions.Add(Convert<T>(msg.Action));
                 }
-                return actions;
             }
-            else return null;
+            return actions;
         }
 
         private bool MessageTypeExists<T>() => _messages.ContainsKey(typeof(T));

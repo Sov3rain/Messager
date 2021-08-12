@@ -12,7 +12,6 @@ public class SimpleExample : MonoBehaviour
             MyMessageHandler,
             MyOtherMessageHandler
         );
-        messenger.Dispatch(new MyMessage());
     }
 
     [ContextMenu("Fire Event")]
@@ -22,17 +21,16 @@ public class SimpleExample : MonoBehaviour
         {
             count = 100
         });
-        messenger.Cut<MyMessage>(this);
     }
 
     private void MyMessageHandler(MyMessage data)
     {
-        Debug.Log("Hey! 1");
+        Debug.Log(name + ": Handler1 ", this);
     }
 
     private void MyOtherMessageHandler(MyMessage data)
     {
-        Debug.Log("Hey! " + data.count);
+        Debug.Log(name + ": Handler2 " + data.count, this);
     }
 }
 
