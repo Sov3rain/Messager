@@ -1,97 +1,137 @@
-# Event Aggregator
+# Messenger
 
 ![version](https://img.shields.io/github/v/tag/Sov3rain/Unity-Event-Aggregator?label=latest) ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
 
-This implementation of the Event Aggregator pattern tries to overcome the limitations of traditional event handling by providing a central place to publish and subscribe for events. It takes care of registering, unregistering and invoking events and thus decoupling publishers and subscribers.
+This implementation of the event aggregator pattern tries to overcome the limitations of traditional event handling by providing a central place to publish and subscribe for events. It takes care of registering, unregistering and invoking events and thus decoupling publishers and subscribers.
 
 ## Installation
 
-Add this dependency to the `dependencies` section of your `Packages/manifest.json`:
+This package uses Unity's [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html) feature to import packages. Add the following sections to the package manifest file located in `Packages/manifest.json`.
 
-##### Latest:
+Add this object to the `scopedRegistries` section:
+
 ```
-"com.soverain.event-aggregator": "https://github.com/Sov3rain/Unity-Event-Aggregator.git#upm"
+{
+  "name": "sov3rain",
+  "url": "https://registry.npmjs.com",
+  "scopes": [ "com.sov3rain" ]
+}
 ```
 
-##### Specific version:
+Add  this line to the `dependencies` section:
+
 ```
-"com.soverain.event-aggregator": "https://github.com/Sov3rain/Unity-Event-Aggregator.git#v1.2.3"
+"com.sov3rain.unity-messenger": "3.0.0"
 ```
 
-You can also add it via the Package Manager window under `Add -> Add package from git URL...` and paste in the url part above.
+Your manifest file should look like this now:
+
+```
+{
+  "scopedRegistries": [
+    {
+      "name": "sov3rain",
+      "url": "https://registry.npmjs.com",
+      "scopes": [ "com.sov3rain" ]
+	}
+  ],
+  "dependencies": {
+    "com.sov3rain.unity-messenger": "3.0.0",
+    ...
+```
 
 ## Usage
-### Create an event
+### Create a message
 
-Events are just plain C# classes that implements the `IEvent` interface.
+`Messages` are just plain C# classes.
 
 ```csharp
-using EventAggregation;
+// Very simple message
+public sealed class MyMessage { } 
 
-public class OnTestEvent : IEvent { } 
-
-public class OnTestEventWithData : IEvent 
+// Another message, holding state (data)
+public sealed class MyOtherMessage
 { 
     public int number;
 }
 ```
 
-### Get a reference of the Event Aggregator
+### Get a reference of the Messenger
 
-You can get a direct reference in any part of your code by accessing the default global static instance, or instantiate your own.
+You can get a direct reference in any part of your code by accessing the default static instance, or instantiate your own.
 
 ```csharp
-// Direct reference.
-var eventAggregator = EventAggregator.DefaultInstance;
+using Messenging;
+
+// Default static instance
+private readonly Messenger messenger = Messenger.DefaultInstance;
 
 // Custom instance.
-public EventAggregator eventAggregator = new EventAggregator();
+private readonly Messenger myMessenger = new Messenger();
 ```
 
 ### Dispatch an event
 
-You can dispatch an event by using the `Dispatch` method. You can dispatch an event with or without data.
+You can dispatch an event by using the `Dispatch()` method.
 
 ```csharp
-// Without data.
-eventAggregator.Dispatch<OnTestEvent>();
-
-// With data.
-eventAggregator.Dispatch(new OnTestEventWithData { number = 42 });
+// Dispatch.
+messenger.Dispatch(new MyMessage());
 ```
 
-### Add and remove listeners
+The message type is inferred by the class instance you create and pass as an argument.
 
-You can add or remove listeners by using the given methods. Remember to always remove a listener upon object destruction to avoid memory leaks and exceptions.
+### Start listening for message
 
-If you want to use the data from an event, you need to cast the `IEvent` parameter to its type.
+Anywhere in any class, you can listen for a message by using the `Listen<T>()` method.
 
-```csharp
-// Listener.cs
+`````c#
+// Listen (register).
+messenger.Listen<MyMessage>(this, msg => {
+   Debug.Log("Message incoming!"); 
+});
+`````
 
-private EventAggregator eventAggregator;
+The type you want to listen for is specified through the generic type parameter. You can add multiple listeners at the same time, the payload parameter being flagged with the keyword `params`:
 
-void Start()
+`````c#
+// Add multiple listeners at the same time.
+messenger.Listen<MyMessage>(
+    owner: this,
+    MyFirstHandler, // Just a standard method.
+    MySecondHandler,
+    (msg) => MyThirdHandler() // Adding a listener with an anonymous function.
+);
+
+// Example of a message handler.
+private void MyFirstHandler(MyMessage msg)
 {
-    eventAggregator = EventAggregator.DefaultInstance;
-    eventAggregator.AddListener<OnTestEvent>(OnTestEventHandler);
-    eventAggregator.AddListener<OnTestEventWithData>(OnTestEventWithDataHandler);
+    Debug.Log("Message incoming!");
 }
+`````
 
-void OnDestroy()
-{
-    eventAggregator.RemoveListener<OnTestEvent>(OnTestEventHandler);
-    eventAggregator.RemoveListener<OnTestEventWithData>(OnTestEventWithDataHandler);
-}
+> Note: You can register anonymous functions safely, because they are bonded to the instance registering (hence the `owner` parameter).
 
-void OnTestEventHandler(IEvent eventData)
-{
-    Debug.Log("Hello, World!");
-}
+### Stop listening for message
 
-void OnTestEventWithDataHandler(IEvent eventData)
-{
-    var data = evenData as OnTestEventWithData;
-    Debug.Log("Hello, World! " + data.number);
-}
-```
+When you want to stop being notified, or before destroying the instance of the class listening, you can call `Cut()` to unregister the object.
+
+`````c#
+// Cut (unregister).
+messenger.Cut<MyMessage>(this);
+`````
+
+> Note: when using `Cut`, all listeners are removed at once, as they are retrieved by owner. 
+
+## Performance
+
+## API Reference
+
+### Messenger Class
+
+#### Fields
+
+#### Properties
+
+#### Methods
+

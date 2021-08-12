@@ -10,7 +10,11 @@ public class SimpleExample : MonoBehaviour
         messenger.Listen<MyMessage>(
             owner: this,
             MyMessageHandler,
-            MyOtherMessageHandler
+            MyOtherMessageHandler,
+            (msg) =>
+            {
+                Debug.Log("Anonymous handler!");
+            }
         );
     }
 
@@ -21,6 +25,12 @@ public class SimpleExample : MonoBehaviour
         {
             count = 100
         });
+    }
+
+    [ContextMenu("Cut")]
+    private void Cut()
+    {
+        messenger.Cut<MyMessage>(this);
     }
 
     private void MyMessageHandler(MyMessage data)
