@@ -43,20 +43,28 @@ Your manifest file should look like this now:
 ## Usage
 ### Create a message
 
-`Messages` are just plain C# classes.
+`Messages` are just plain C# classes. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold a state (data).
+
+> Note: messages being classes, they are reference type. Modifying them in one place will potentially impact other systems in your application. You can mitigate this by making your class immutable.
 
 ```csharp
 // Very simple message
 public sealed class MyMessage { } 
 
-// Another message, holding state (data)
+// Another message, holding state (data).
+// This class is immutable.
 public sealed class MyOtherMessage
 { 
-    public int number;
+    public int Number { get; private set; }
+  
+  	public MyOtherMessage(int number)
+    {
+      Number = number;
+    }
 }
 ```
 
-### Get a reference of the Messenger
+### Referencing the messenger
 
 You can get a direct reference in any part of your code by accessing the default static instance, or instantiate your own.
 
@@ -70,7 +78,9 @@ private readonly Messenger messenger = Messenger.DefaultInstance;
 private readonly Messenger myMessenger = new Messenger();
 ```
 
-### Dispatch an event
+> Note: instantiating your own Messenger class could help unit testing or mocking, but for regular use, it's recommended to use the default static instance.
+
+### Dispatch a message
 
 You can dispatch an event by using the `Dispatch()` method.
 
@@ -81,9 +91,9 @@ messenger.Dispatch(new MyMessage());
 
 The message type is inferred by the class instance you create and pass as an argument.
 
-### Start listening for message
+### Start listening for a message
 
-Anywhere in any class, you can listen for a message by using the `Listen<T>()` method.
+Anywhere in any class, you can listen for a message by using the `Listen<T>()` method. The type you want to listen for is specified through the generic type parameter.
 
 `````c#
 // Listen (register).
@@ -92,7 +102,7 @@ messenger.Listen<MyMessage>(this, msg => {
 });
 `````
 
-The type you want to listen for is specified through the generic type parameter. You can add multiple listeners at the same time, the payload parameter being flagged with the keyword `params`:
+ You can add multiple listeners at the same time, the payload parameter is flagged with the keyword `params`:
 
 `````c#
 // Add multiple listeners at the same time.
@@ -110,9 +120,9 @@ private void MyFirstHandler(MyMessage msg)
 }
 `````
 
-> Note: You can register anonymous functions safely, because they are bonded to the instance registering (hence the `owner` parameter).
+> Note: You can register anonymous functions safely. Because they are bonded to the instance registering (hence the `owner` parameter), they are referenced and can be destroyed later.
 
-### Stop listening for message
+### Stop listening for a message
 
 When you want to stop being notified, or before destroying the instance of the class listening, you can call `Cut()` to unregister the object.
 
@@ -121,9 +131,17 @@ When you want to stop being notified, or before destroying the instance of the c
 messenger.Cut<MyMessage>(this);
 `````
 
-> Note: when using `Cut`, all listeners are removed at once, as they are retrieved by owner. 
+> Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner. 
 
 ## Performance
+
+Of course the performance of the `Menssenger` is not the same as a plain C# action, but my goal was convenience over performance. Nonetheless, the `Messenger` is 40% to 50% slower than an `Action`.
+
+I think for most people it's negligible, but if you think you can improve the performance of the `Messenger`, PRs are welcome! :).
+
+Here is an example with a list of 100,000 listeners, each logging when the message is received:
+
+// TODO: ADD SCREENSHOT  
 
 ## API Reference
 
@@ -131,7 +149,19 @@ messenger.Cut<MyMessage>(this);
 
 #### Fields
 
+| Name | Description |
+| ---- | ----------- |
+|      |             |
+
 #### Properties
 
+| Name | Description |
+| ---- | ----------- |
+|      |             |
+
 #### Methods
+
+| Name | Description |
+| ---- | ----------- |
+|      |             |
 
