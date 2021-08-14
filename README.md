@@ -133,25 +133,9 @@ messenger.Cut<MyMessage>(this);
 
 > Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner. 
 
-## Performance
-
-Of course the performance of the `Menssenger` is not the same as a plain C# action, but my goal was convenience over performance. Nonetheless, the `Messenger` is 40% to 50% slower than an `Action`.
-
-I think for most people it's negligible, but if you think you can improve the performance of the `Messenger`, PRs are welcome! :).
-
-Here is an example with a list of 100,000 listeners, each logging when the message is received:
-
-// TODO: ADD SCREENSHOT  
-
 ## API Reference
 
 ### Messenger Class
-
-#### Fields
-
-| Name | Description |
-| ---- | ----------- |
-|      |             |
 
 #### Properties
 
