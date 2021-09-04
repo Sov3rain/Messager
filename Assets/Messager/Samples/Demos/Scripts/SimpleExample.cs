@@ -3,11 +3,11 @@ using Messaging;
 
 public class SimpleExample : MonoBehaviour
 {
-    private readonly Messenger messenger = Messenger.DefaultInstance;
+    private readonly Messager Messager = Messager.DefaultInstance;
 
     private void Start()
     {
-        messenger.Listen<MyMessage>(
+        Messager.Listen<MyMessage>(
             owner: this,
             MyMessageHandler,
             MyOtherMessageHandler,
@@ -21,7 +21,7 @@ public class SimpleExample : MonoBehaviour
     [ContextMenu("Fire Event")]
     private void FireEvent()
     {
-        messenger.Dispatch(new MyMessage
+        Messager.Dispatch(new MyMessage
         {
             count = 100
         });
@@ -30,7 +30,7 @@ public class SimpleExample : MonoBehaviour
     [ContextMenu("Cut")]
     private void Cut()
     {
-        messenger.Cut<MyMessage>(this);
+        Messager.Cut<MyMessage>(this);
     }
 
     private void MyMessageHandler(MyMessage data)

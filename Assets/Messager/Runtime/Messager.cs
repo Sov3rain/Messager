@@ -4,20 +4,21 @@ using UnityEngine;
 
 namespace Messaging
 {
-    public sealed class Messenger
+    public sealed class Messager
     {
-        static public Messenger DefaultInstance
+        private sealed class Message
         {
-            get
+            public object Owner { get; }
+            public Action<object> Action { get; }
+
+            public Message(object owner, Action<object> action)
             {
-                if (_instance is null)
-                {
-                    _instance = new Messenger();
-                }
-                return _instance;
+                Owner = owner;
+                Action = action;
             }
         }
-        static private Messenger _instance;
+
+        static public Messager DefaultInstance { get; } = new Messager();
 
         private const string NULL_LISTENER_WARNING =
             "Messenger: destroyed references of '{0}' are still registered " +
@@ -97,16 +98,5 @@ namespace Messaging
             else return new Action<object>(o => action((T)o));
         }
 
-        private sealed class Message
-        {
-            public object Owner { get; }
-            public Action<object> Action { get; }
-
-            public Message(object owner, Action<object> action)
-            {
-                Owner = owner;
-                Action = action;
-            }
-        }
     }
 }

@@ -12,19 +12,19 @@ public class PerformanceExample : MonoBehaviour
     private List<TestListener> listenersMessage = new List<TestListener>();
     private List<TestAction> listenersAction = new List<TestAction>();
 
-    private readonly Messenger messenger = Messenger.DefaultInstance;
+    private readonly Messager Messager = Messager.DefaultInstance;
 
     [ContextMenu("Benchmark Messages")]
     private void FireMessage()
     {
         for (int i = 0; i < count; i++)
         {
-            listenersMessage.Add(new TestListener(messenger));
+            listenersMessage.Add(new TestListener(Messager));
         }
         Debug.Log("Start watching messages...");
         var watch = new System.Diagnostics.Stopwatch();
         watch.Start();
-        messenger.Dispatch(new WatchedMessage());
+        Messager.Dispatch(new WatchedMessage());
         watch.Stop();
         Debug.Log($"Execution time for {listenersMessage.Count} elements: {watch.ElapsedMilliseconds} ms");
     }
@@ -47,7 +47,7 @@ public class PerformanceExample : MonoBehaviour
 
 public sealed class TestListener
 {
-    public TestListener(Messenger messenger)
+    public TestListener(Messager messenger)
     {
         messenger.Listen<WatchedMessage>(this, msg =>
         {
