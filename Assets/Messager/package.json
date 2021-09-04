@@ -1,9 +1,9 @@
 {
-  "name": "com.sov3rain.unity-messenger",
+  "name": "com.sov3rain.messager",
   "version": "3.0.0",
-  "displayName": "Messenger",
-  "description": "Messenger is a simple messaging system for Unity.",
-  "documentationUrl": "https://github.com/Sov3rain/Unity-Event-Aggregator",
+  "displayName": "Messager",
+  "description": "Messager is a simple messaging system for Unity.",
+  "documentationUrl": "https://github.com/Sov3rain/Messager",
   "unity": "2019.4",
   "keywords": [
     "unity",
