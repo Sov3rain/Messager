@@ -1,10 +1,9 @@
+using static Facade;
+
 using UnityEngine;
-using Messaging;
 
 public class SimpleExample : MonoBehaviour
 {
-    private readonly Messager Messager = Messager.DefaultInstance;
-
     private void Start()
     {
         Messager.Listen<MyMessage>(

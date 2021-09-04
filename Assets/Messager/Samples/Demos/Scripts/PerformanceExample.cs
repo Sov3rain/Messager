@@ -12,19 +12,19 @@ public class PerformanceExample : MonoBehaviour
     private List<TestListener> listenersMessage = new List<TestListener>();
     private List<TestAction> listenersAction = new List<TestAction>();
 
-    private readonly Messager Messager = Messager.DefaultInstance;
+    private readonly Messager _messager = Messager.DefaultInstance;
 
     [ContextMenu("Benchmark Messages")]
     private void FireMessage()
     {
         for (int i = 0; i < count; i++)
         {
-            listenersMessage.Add(new TestListener(Messager));
+            listenersMessage.Add(new TestListener(_messager));
         }
         Debug.Log("Start watching messages...");
         var watch = new System.Diagnostics.Stopwatch();
         watch.Start();
-        Messager.Dispatch(new WatchedMessage());
+        _messager.Dispatch(new WatchedMessage());
         watch.Stop();
         Debug.Log($"Execution time for {listenersMessage.Count} elements: {watch.ElapsedMilliseconds} ms");
     }
