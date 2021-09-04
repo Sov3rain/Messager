@@ -70,4 +70,8 @@ crashlytics-build.properties
 InitTestScene*.unity.meta
 InitTestScene*.unity
 
+# Tarballs
+*.tgz
+*.tgz.meta
+
 # End of https://www.toptal.com/developers/gitignore/api/unity
