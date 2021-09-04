@@ -38,6 +38,8 @@ Your manifest file should look like this now:
   "dependencies": {
     "com.sov3rain.messager": "3.0.0",
     ...
+  }
+}
 ```
 
 ## Usage

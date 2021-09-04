@@ -38,10 +38,11 @@ Your manifest file should look like this now:
   "dependencies": {
     "com.sov3rain.messager": "3.0.0",
     ...
+  }
+}
 ```
 
 ## Usage
-
 ### Create a message
 
 `Messages` are just plain C# classes. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold a state (data).
@@ -156,19 +157,19 @@ Messager.Cut<MyMessage>(this);
 
 #### Methods
 
-| Name                                                   | Description                                                  |
-| ------------------------------------------------------ | ------------------------------------------------------------ |
-| `Listen<T>(object owner, params Action<T>[] handlers)` | Register handlers. The type you want to listen for must be passed in the generic parameter. |
-| `Cut<T>(object owner)`                                 | Remove all handlers owned by the `owner` object for the specified type. |
+| Name                                                   | Description                                                                                           |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `Listen<T>(object owner, params Action<T>[] handlers)` | Register handlers. The type you want to listen for must be passed in the generic parameter.           |
+| `Cut<T>(object owner)`                                 | Remove all handlers owned by the `owner` object for the specified type.                               |
 | `Dispatch<T>(T payload)`                               | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
 
 ### Message Class
 
 #### Properties
 
-| Name                      | Description                                                  |
-| ------------------------- | ------------------------------------------------------------ |
-| `(object) Owner`          | The reference of the object owning this message.             |
+| Name                      | Description                                                                              |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| `(object) Owner`          | The reference of the object owning this message.                                         |
 | `(Action<object>) Action` | The registered callback. Will be invoked when a new message type matching is dispatched. |
 
 #### Contructors
@@ -183,6 +184,6 @@ _`static`_
 
 #### Properties
 
-| Name                  | Description                                                  |
-| --------------------- | ------------------------------------------------------------ |
+| Name                  | Description                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------ |
 | `(Messager) Messager` | Returns the default instance of Messager for quick access trhough scripts. Readonly. |
