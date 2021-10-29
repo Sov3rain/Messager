@@ -1,49 +1,48 @@
-using static Facade;
-
 using UnityEngine;
 
 public class SimpleExample : MonoBehaviour
 {
+    readonly private Messager _messager = Messager.DefaultInstance;
+
     private void Start()
     {
-        Messager.Listen<MyMessage>(
-            owner: this,
-            MyMessageHandler,
-            MyOtherMessageHandler,
-            (msg) =>
-            {
-                Debug.Log("Anonymous handler!");
-            }
-        );
+        _messager
+            .Listen<MyMessage>(
+                owner: this,
+                (msg) => Debug.Log("Anonymous handler!")
+            )
+            .Listen<MyOtherMessage>(
+                owner: this,
+                (msg) => Debug.Log($"{msg.count}")
+            );
     }
 
     [ContextMenu("Fire Event")]
     private void FireEvent()
     {
-        Messager.Dispatch(new MyMessage
-        {
-            count = 100
-        });
+        _messager.Dispatch(new MyMessage { count = 100 });
+
+        _messager.Dispatch(new MyOtherMessage(count: 100));
     }
 
     [ContextMenu("Cut")]
     private void Cut()
     {
-        Messager.Cut<MyMessage>(this);
-    }
-
-    private void MyMessageHandler(MyMessage data)
-    {
-        Debug.Log(name + ": Handler1 ", this);
-    }
-
-    private void MyOtherMessageHandler(MyMessage data)
-    {
-        Debug.Log(name + ": Handler2 " + data.count, this);
+        _messager.Cut<MyMessage>(this);
     }
 }
 
 public sealed class MyMessage
 {
     public int count;
+}
+
+readonly public struct MyOtherMessage
+{
+    readonly public int count;
+
+    public MyOtherMessage(int count)
+    {
+        this.count = count;
+    }
 }

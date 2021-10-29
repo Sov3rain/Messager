@@ -45,23 +45,39 @@ Your manifest file should look like this now:
 ## Usage
 ### Create a message
 
-`Messages` are just plain C# classes. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold a state (data).
+`Messages` are just plain C# object. They can be classes or structs alike. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold a state (data).
 
-> Note: messages being classes, they are reference type. Modifying them in one place will potentially impact other systems in your application. You can mitigate this by making your class immutable.
+> Note: if you use classes for messages, remember that they are reference type. Modifying them in one place will potentially impact other systems in your application. You can mitigate this by making your class immutable.
 
 ```csharp
-// Very simple message
+// Prefer using structs as message containers.
+public struct MyMessage
+{
+    public int number;
+}
+
+// Even safer are readonly structs.
+readonly public struct MyMessage
+{
+    readonly public int number;
+    
+    public MyMessage(int number)
+    {
+        this.number = number;
+    }
+}
+
+// You can also use classes.
 public sealed class MyMessage { } 
 
-// Another message, holding state (data).
-// This class is immutable.
+// Class using immutable fields.
 public sealed class MyOtherMessage
 { 
     public int Number { get; private set; }
   
   	public MyOtherMessage(int number)
     {
-      Number = number;
+        Number = number;
     }
 }
 ```
@@ -81,16 +97,6 @@ private readonly Messenger _myMessager = new Messager();
 ```
 
 > Note: instantiating your own Messager class could help unit testing or mocking, but for regular use, it's recommended to use the default static instance.
-
-You can also use the special class `Facade` to get the default instance of `Message` without having to create a local reference in your other classes:
-
-`````c#
-// Import the static namespace
-using static Facade;
-
-// Access messager anywhere
-Messager.Dispatch(...);
-`````
 
 ### Dispatch a message
 
@@ -114,7 +120,7 @@ Messager.Listen<MyMessage>(this, msg => {
 });
 `````
 
- You can add multiple listeners at the same time, the payload parameter is flagged with the keyword `params`:
+ You can add multiple listeners at the same time, or an array of handlers:
 
 `````c#
 // Add multiple listeners at the same time.
@@ -172,18 +178,8 @@ Messager.Cut<MyMessage>(this);
 | `(object) Owner`          | The reference of the object owning this message.                                         |
 | `(Action<object>) Action` | The registered callback. Will be invoked when a new message type matching is dispatched. |
 
-#### Contructors
+#### Constructors
 
 | Name                                           | Description                                                |
 | ---------------------------------------------- | ---------------------------------------------------------- |
 | `Message(object owner, Action<object> action)` | Default constructor. Sets the owner and action properties. |
-
-### Facade Class
-
-_`static`_ 
-
-#### Properties
-
-| Name                  | Description                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------ |
-| `(Messager) Messager` | Returns the default instance of Messager for quick access trhough scripts. Readonly. |
