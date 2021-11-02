@@ -4,12 +4,12 @@ using UnityEngine;
 
 public sealed class Messager
 {
-    private sealed class Message
+    private sealed class Subscription
     {
         public object Owner { get; }
         public Action<object> Action { get; }
 
-        public Message(object owner, Action<object> action)
+        public Subscription(object owner, Action<object> action)
         {
             Owner = owner;
             Action = action;
@@ -23,62 +23,51 @@ public sealed class Messager
         "for '{1}' messages. Clear your listeners upon object destruction " +
         "by calling Cut().";
 
-    private readonly Dictionary<Type, HashSet<Message>> _messages
-        = new Dictionary<Type, HashSet<Message>>();
+    private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
+        = new Dictionary<Type, HashSet<Subscription>>();
 
     public Messager Listen<T>(object owner, Action<T> handler)
     {
-        if (!MessageTypeExists<T>()) AddMessageType<T>();
+        if (!_subscriptions.ContainsKey(typeof(T)))
+        {
+            _subscriptions.Add(typeof(T), new HashSet<Subscription>());
+        }
 
         Action<object> action = Convert(handler);
-        _messages[typeof(T)].Add(new Message(owner, action));
+        _subscriptions[typeof(T)].Add(new Subscription(owner, action));
         return this;
     }
 
     public void Cut<T>(object owner)
     {
-        if (!MessageTypeExists<T>()) return;
-        else _messages[typeof(T)].RemoveWhere(o => o.Owner == owner);
+        if (!_subscriptions.ContainsKey(typeof(T))) return;
+        else _subscriptions[typeof(T)].RemoveWhere(o => o.Owner == owner);
     }
 
     public void Dispatch<T>(T payload)
     {
-        HashSet<Action<T>> actions = GetActionsFrom<T>();
+        var actions = new HashSet<Action<T>>();
+        if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
+        {
+            // Convert back each action of type object to an action of type T.
+            foreach (Subscription sub in subs)
+            {
+                if (sub.Owner.Equals(null))
+                {
+                    Debug.LogWarning(
+                        string.Format(NULL_LISTENER_WARNING, sub.Owner.GetType(), typeof(T))
+                    );
+                    continue;
+                }
+                actions.Add(Convert<T>(sub.Action));
+            }
+        }
 
         foreach (Action<T> action in actions)
         {
             action(payload);
         }
     }
-
-    private void AddMessageType<T>()
-    {
-        _messages.Add(typeof(T), new HashSet<Message>());
-    }
-
-    private HashSet<Action<T>> GetActionsFrom<T>()
-    {
-        var actions = new HashSet<Action<T>>();
-        if (_messages.TryGetValue(typeof(T), out HashSet<Message> msgs))
-        {
-            foreach (Message msg in msgs)
-            {
-                if (msg.Owner.Equals(null))
-                {
-                    Debug.LogWarning(string.Format(
-                        NULL_LISTENER_WARNING,
-                        msg.Owner.GetType(),
-                        typeof(T)
-                    ));
-                    continue;
-                }
-                else actions.Add(Convert<T>(msg.Action));
-            }
-        }
-        return actions;
-    }
-
-    private bool MessageTypeExists<T>() => _messages.ContainsKey(typeof(T));
 
     private Action<T> Convert<T>(Action<object> action)
     {
