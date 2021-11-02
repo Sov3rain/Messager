@@ -4,11 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 ___
 
-## [3.0.0] - 2021-09-04
+## [1.0.0] - 2021-11-02
 
 ### Breaking Changes
 
 - Rename to `Messsager`.
+- Reset version to 1.0.0.
 - Pretty much the entire API has been renamed and changed, so I discourage you to update if you are actually using version 2.0.0. See the readme for the new API guide.
 
 ### Added
