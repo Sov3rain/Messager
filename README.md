@@ -1,12 +1,12 @@
 # Messager
 
-![version](https://img.shields.io/github/v/tag/Sov3rain/Messager?label=latest) ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
+![npm](https://img.shields.io/npm/v/com.sov3rain.messager) ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
 
 This implementation of the event aggregator pattern tries to overcome the limitations of traditional event handling by providing a central place to publish and subscribe for events. It takes care of registering, unregistering and invoking events and thus decoupling publishers and subscribers.
 
 ## Installation
 
-This package uses Unity's [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html) feature to import packages. Add the following sections to the package manifest file located in `Packages/manifest.json`.
+This package uses Unity's [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html) feature to import packages and is hosted [here](https://www.npmjs.com/package/com.sov3rain.messager). Add the following sections to the package manifest file located in `Packages/manifest.json`.
 
 Add this object to the `scopedRegistries` section:
 
