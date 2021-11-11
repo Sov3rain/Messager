@@ -45,7 +45,7 @@ Your manifest file should look like this now:
 ## Usage
 ### Create a message
 
-`Messages` are just plain C# object. They can be classes or structs alike. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold a state (data).
+Messages are just plain C# objects. They can be classes or structs. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold data.
 
 > Note: if you use classes for messages, remember that they are reference type. Modifying them in one place will potentially impact other systems in your application. You can mitigate this by making your class immutable.
 
@@ -53,29 +53,29 @@ Your manifest file should look like this now:
 // Prefer using structs as message containers.
 public struct MyMessage
 {
-    public int number;
+    public int Number;
 }
 
 // Even safer are readonly structs.
 readonly public struct MyMessage
 {
-    readonly public int number;
+    readonly public int Number;
     
     public MyMessage(int number)
     {
-        this.number = number;
+        Number = number;
     }
 }
 
-// You can also use classes.
+// You can also use a class.
 public sealed class MyMessage { } 
 
-// Class using immutable fields.
+// Or an immutable class.
 public sealed class MyOtherMessage
 { 
-    public int Number { get; private set; }
+    public int Number { get; }
   
-  	public MyOtherMessage(int number)
+    public MyOtherMessage(int number)
     {
         Number = number;
     }
@@ -100,10 +100,9 @@ private readonly Messenger _myMessager = new Messager();
 
 ### Dispatch a message
 
-You can dispatch an event by using the `Dispatch()` method.
+You can dispatch a new message by using the `Dispatch()` method.
 
 ```csharp
-// Dispatch.
 Messager.Dispatch(new MyMessage());
 ```
 
@@ -114,42 +113,23 @@ The message type is inferred by the class instance you create and pass as an arg
 Anywhere in any class, you can listen for a message by using the `Listen<T>()` method. The type you want to listen for is specified through the generic type parameter.
 
 `````c#
-// Listen (register).
 Messager.Listen<MyMessage>(this, msg => {
    Debug.Log("Message incoming!"); 
 });
 `````
 
- You can add multiple listeners at the same time, or an array of handlers:
-
-`````c#
-// Add multiple listeners at the same time.
-Messager.Listen<MyMessage>(
-    owner: this,
-    MyFirstHandler, // Just a standard method.
-    MySecondHandler,
-    (msg) => MyThirdHandler() // Adding a listener with an anonymous function.
-);
-
-// Example of a message handler.
-private void MyFirstHandler(MyMessage msg)
-{
-    Debug.Log("Message incoming!");
-}
-`````
-
-> Note: You can register anonymous functions safely. Because they are bonded to the instance registering (hence the `owner` parameter), they are referenced and can be destroyed later.
+> Note: You can register anonymous functions safely. Because they are bonded to the instance registering (hence the `owner` parameter), they can be destroyed later.
 
 ### Stop listening for a message
 
-When you want to stop being notified, or before destroying the instance of the class listening, you can call `Cut()` to unregister the object.
+When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object.
 
 `````c#
-// Cut (unregister).
 Messager.Cut<MyMessage>(this);
 `````
 
-> Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner. 
+> Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
+> Note 2: remember to always call `Cut()` before destroying an object instance that is still listening to messages.
 
 ## API Reference
 
