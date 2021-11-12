@@ -21,7 +21,7 @@ Add this object to the `scopedRegistries` section:
 Add  this line to the `dependencies` section:
 
 ```
-"com.sov3rain.messager": "3.0.0"
+"com.sov3rain.messager": "1.0.0"
 ```
 
 Your manifest file should look like this now:
@@ -36,7 +36,7 @@ Your manifest file should look like this now:
 	}
   ],
   "dependencies": {
-    "com.sov3rain.messager": "3.0.0",
+    "com.sov3rain.messager": "1.0.0",
     ...
   }
 }
@@ -47,38 +47,11 @@ Your manifest file should look like this now:
 
 Messages are just plain C# objects. They can be classes or structs. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold data.
 
-> Note: if you use classes for messages, remember that they are reference type. Modifying them in one place will potentially impact other systems in your application. You can mitigate this by making your class immutable.
-
 ```csharp
 // Prefer using structs as message containers.
 public struct MyMessage
 {
     public int Number;
-}
-
-// Even safer are readonly structs.
-readonly public struct MyMessage
-{
-    readonly public int Number;
-    
-    public MyMessage(int number)
-    {
-        Number = number;
-    }
-}
-
-// You can also use a class.
-public sealed class MyMessage { } 
-
-// Or an immutable class.
-public sealed class MyOtherMessage
-{ 
-    public int Number { get; }
-  
-    public MyOtherMessage(int number)
-    {
-        Number = number;
-    }
 }
 ```
 
@@ -130,6 +103,44 @@ Messager.Cut<MyMessage>(this);
 
 > Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
 > Note 2: remember to always call `Cut()` before destroying an object instance that is still listening to messages.
+
+## Good Practices
+
+**DO** use immutable objects as messages to avoid side effects:
+
+```csharp
+public sealed class ImmutableMessage
+{
+    public int Number { get; }
+
+    public ImmutableMessage(int number)
+    {
+        Number = number;
+    }
+}
+
+public readonly struct ImmutableStructMessage
+{
+    public readonly int Number;
+
+    public ImmutableStructMessage(int number)
+    {
+        Number = number;
+    }
+}
+```
+
+**DO** cache the message instance if you plan on reusing it multiple times to avoid unnecessary memory allocations:
+
+```csharp
+MyMessage _msg = new MyMessage(42);
+
+// Example code, don't do that.
+void Update()
+{
+    _messager.Dispatch(this, _msg);
+}
+```
 
 ## API Reference
 
