@@ -60,8 +60,6 @@ public struct MyMessage
 You can get a direct reference in any part of your code by accessing the default static instance, or instantiate your own.
 
 ```csharp
-using Messenging;
-
 // Default static instance
 private readonly Messenger _messager = Messager.DefaultInstance;
 
@@ -85,11 +83,11 @@ The message type is inferred by the class instance you create and pass as an arg
 
 Anywhere in any class, you can listen for a message by using the `Listen<T>()` method. The type you want to listen for is specified through the generic type parameter.
 
-`````c#
+```c#
 Messager.Listen<MyMessage>(this, msg => {
    Debug.Log("Message incoming!"); 
 });
-`````
+```
 
 > Note: You can register anonymous functions safely. Because they are bonded to the instance registering (hence the `owner` parameter), they can be destroyed later.
 
@@ -97,9 +95,9 @@ Messager.Listen<MyMessage>(this, msg => {
 
 When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object.
 
-`````c#
+```c#
 Messager.Cut<MyMessage>(this);
-`````
+```
 
 > Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
 > Note 2: remember to always call `Cut()` before destroying an object instance that is still listening to messages.
@@ -156,7 +154,7 @@ void Update()
 
 | Name                                                   | Description                                                                                           |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `Listen<T>(object owner, params Action<T>[] handlers)` | Register handlers. The type you want to listen for must be passed in the generic parameter.           |
+| `Listen<T>(object owner, Action<T> handler)` | Registers a handler. The type you want to listen for must be passed in the generic parameter.           |
 | `Cut<T>(object owner)`                                 | Remove all handlers owned by the `owner` object for the specified type.                               |
 | `Dispatch<T>(T payload)`                               | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
 
