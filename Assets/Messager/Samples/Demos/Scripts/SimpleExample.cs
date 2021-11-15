@@ -4,6 +4,8 @@ public class SimpleExample : MonoBehaviour
 {
     readonly private Messager _messager = Messager.DefaultInstance;
 
+    private NonUnityListener lis;
+
     private void Start()
     {
         _messager
@@ -13,8 +15,10 @@ public class SimpleExample : MonoBehaviour
             )
             .Listen<MyOtherMessage>(
                 owner: this,
-                (msg) => Debug.Log($"{msg.count}")
+                (msg) => Debug.Log($"Count: {msg.count}")
             );
+
+        lis = new NonUnityListener();
     }
 
     [ContextMenu("Fire Event")]
@@ -44,5 +48,17 @@ readonly public struct MyOtherMessage
     public MyOtherMessage(int count)
     {
         this.count = count;
+    }
+}
+
+public class NonUnityListener
+{
+    public NonUnityListener()
+    {
+        Messager.DefaultInstance.Listen<MyMessage>(this, msg =>
+        {
+            Debug.Log($"{GetType()} has received a message.");
+            Messager.DefaultInstance.Cut<MyMessage>(this);
+        });
     }
 }

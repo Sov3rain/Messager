@@ -1,0 +1,17 @@
+{
+    "name": "Soverain.Messager.Editor",
+    "references": [
+        "GUID:f12810581312a2245990ae585be7170a"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

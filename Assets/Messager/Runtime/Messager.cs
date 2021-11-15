@@ -4,7 +4,7 @@ using UnityEngine;
 
 public sealed class Messager
 {
-    private sealed class Subscription
+    public sealed class Subscription
     {
         public object Owner { get; }
         public Action<object> Action { get; }
@@ -28,6 +28,11 @@ public sealed class Messager
 
     public Messager Listen<T>(object owner, Action<T> handler)
     {
+#if UNITY_EDITOR
+        if (UnityEditor.EditorPrefs.GetBool("Messager/Enable Devtools"))
+            MessagerDevtools.AddSubscriptionRecord(typeof(T), owner);
+#endif
+
         if (!_subscriptions.ContainsKey(typeof(T)))
         {
             _subscriptions.Add(typeof(T), new HashSet<Subscription>());
@@ -46,6 +51,11 @@ public sealed class Messager
 
     public void Dispatch<T>(T payload)
     {
+#if UNITY_EDITOR
+        if (UnityEditor.EditorPrefs.GetBool("Messager/Enable Devtools"))
+            MessagerDevtools.AddHistoryRecord(typeof(T), payload);
+#endif
+
         var actions = new HashSet<Action<T>>();
         if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
         {
