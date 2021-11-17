@@ -4,9 +4,8 @@ using static UnityEditor.EditorPrefs;
 
 using UnityEngine;
 using UnityEditor;
-using System.Reflection.Emit;
 
-public class MessagerDevtoolsWindow : EditorWindow
+public sealed class MessagerDevtoolsWindow : EditorWindow
 {
     static bool DevtoolsEnabled
     {
@@ -21,6 +20,18 @@ public class MessagerDevtoolsWindow : EditorWindow
     Vector2 _scrollPosHistory;
     Vector2 _scrollPosSubs;
     string _subSearch;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void InitMiddlewares()
+    {
+        if (!DevtoolsEnabled)
+            return;
+
+        Messager.DefaultInstance.InitMiddlewares(
+            onDispatch: MessagerDevtools.AddHistoryRecord,
+            onListen: MessagerDevtools.AddSubscriptionRecord
+        );
+    }
 
     [MenuItem("Messager/Open Devtools Window")]
     static void ShowWindow()

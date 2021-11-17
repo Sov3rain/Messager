@@ -26,12 +26,24 @@ public sealed class Messager
     private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
         = new Dictionary<Type, HashSet<Subscription>>();
 
+    private Action<Type, object> _dispatchMiddleware;
+    private Action<Type, object> _listenMiddleware;
+
+    public void InitMiddlewares(
+        Action<Type, object> onDispatch,
+        Action<Type, object> onListen
+    )
+    {
+        if (onDispatch != null)
+            _dispatchMiddleware += onDispatch;
+
+        if (onListen != null)
+            _listenMiddleware += onListen;
+    }
+
     public Messager Listen<T>(object owner, Action<T> handler)
     {
-#if UNITY_EDITOR
-        if (UnityEditor.EditorPrefs.GetBool("Messager/Enable Devtools"))
-            MessagerDevtools.AddSubscriptionRecord(typeof(T), owner);
-#endif
+        _listenMiddleware?.Invoke(typeof(T), owner);
 
         if (!_subscriptions.ContainsKey(typeof(T)))
         {
@@ -45,18 +57,18 @@ public sealed class Messager
 
     public void Cut<T>(object owner)
     {
-        if (!_subscriptions.ContainsKey(typeof(T))) return;
-        else _subscriptions[typeof(T)].RemoveWhere(o => o.Owner == owner);
+        if (!_subscriptions.ContainsKey(typeof(T)))
+            return;
+
+        _subscriptions[typeof(T)].RemoveWhere(o => o.Owner == owner);
     }
 
     public void Dispatch<T>(T payload)
     {
-#if UNITY_EDITOR
-        if (UnityEditor.EditorPrefs.GetBool("Messager/Enable Devtools"))
-            MessagerDevtools.AddHistoryRecord(typeof(T), payload);
-#endif
+        _dispatchMiddleware?.Invoke(typeof(T), payload);
 
         var actions = new HashSet<Action<T>>();
+
         if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
         {
             // Convert back each action of type object to an action of type T.
@@ -79,15 +91,19 @@ public sealed class Messager
         }
     }
 
-    private Action<T> Convert<T>(Action<object> action)
+    Action<T> Convert<T>(Action<object> action)
     {
-        if (action == null) return null;
-        else return new Action<T>(o => action(o));
+        if (action == null)
+            return null;
+
+        return new Action<T>(o => action(o));
     }
 
-    private Action<object> Convert<T>(Action<T> action)
+    Action<object> Convert<T>(Action<T> action)
     {
-        if (action == null) return null;
-        else return new Action<object>(o => action((T)o));
+        if (action == null)
+            return null;
+
+        return new Action<object>(o => action((T)o));
     }
 }
