@@ -4,6 +4,8 @@ using UnityEngine;
 
 public sealed class Messager
 {
+    public delegate void Middleware(Type type, object owner, Action next);
+
     public sealed class Subscription
     {
         public object Owner { get; }
@@ -26,32 +28,33 @@ public sealed class Messager
     private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
         = new Dictionary<Type, HashSet<Subscription>>();
 
-    private Action<Type, object> _dispatchMiddleware;
-    private Action<Type, object> _listenMiddleware;
+    private Middleware _dispatchMiddleware = (t, o, next) => next();
+    private Middleware _listenMiddleware = (t, o, next) => next();
 
-    public void InitMiddlewares(
-        Action<Type, object> onDispatch,
-        Action<Type, object> onListen
+    public void Use(
+        Middleware onDispatch,
+        Middleware onListen
     )
     {
         if (onDispatch != null)
-            _dispatchMiddleware += onDispatch;
+            _dispatchMiddleware = onDispatch;
 
         if (onListen != null)
-            _listenMiddleware += onListen;
+            _listenMiddleware = onListen;
     }
 
     public Messager Listen<T>(object owner, Action<T> handler)
     {
-        _listenMiddleware?.Invoke(typeof(T), owner);
-
-        if (!_subscriptions.ContainsKey(typeof(T)))
+        _listenMiddleware(typeof(T), owner, () =>
         {
-            _subscriptions.Add(typeof(T), new HashSet<Subscription>());
-        }
+            if (!_subscriptions.ContainsKey(typeof(T)))
+            {
+                _subscriptions.Add(typeof(T), new HashSet<Subscription>());
+            }
 
-        Action<object> action = Convert(handler);
-        _subscriptions[typeof(T)].Add(new Subscription(owner, action));
+            Action<object> action = Convert(handler);
+            _subscriptions[typeof(T)].Add(new Subscription(owner, action));
+        });
         return this;
     }
 
@@ -65,30 +68,31 @@ public sealed class Messager
 
     public void Dispatch<T>(T payload)
     {
-        _dispatchMiddleware?.Invoke(typeof(T), payload);
-
-        var actions = new HashSet<Action<T>>();
-
-        if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
+        _dispatchMiddleware(typeof(T), payload, () =>
         {
-            // Convert back each action of type object to an action of type T.
-            foreach (Subscription sub in subs)
+            var actions = new HashSet<Action<T>>();
+
+            if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
             {
-                if (sub.Owner.Equals(null))
+                // Convert back each action of type object to an action of type T.
+                foreach (Subscription sub in subs)
                 {
-                    Debug.LogWarning(
-                        string.Format(NULL_LISTENER_WARNING, sub.Owner.GetType(), typeof(T))
-                    );
-                    continue;
+                    if (sub.Owner.Equals(null))
+                    {
+                        Debug.LogWarning(
+                            string.Format(NULL_LISTENER_WARNING, sub.Owner.GetType(), typeof(T))
+                        );
+                        continue;
+                    }
+                    actions.Add(Convert<T>(sub.Action));
                 }
-                actions.Add(Convert<T>(sub.Action));
             }
-        }
 
-        foreach (Action<T> action in actions)
-        {
-            action(payload);
-        }
+            foreach (Action<T> action in actions)
+            {
+                action(payload);
+            }
+        });
     }
 
     Action<T> Convert<T>(Action<object> action)

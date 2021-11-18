@@ -27,7 +27,7 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
         if (!DevtoolsEnabled)
             return;
 
-        Messager.DefaultInstance.InitMiddlewares(
+        Messager.DefaultInstance.Use(
             onDispatch: MessagerDevtools.AddHistoryRecord,
             onListen: MessagerDevtools.AddSubscriptionRecord
         );

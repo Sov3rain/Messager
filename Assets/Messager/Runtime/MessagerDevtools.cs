@@ -35,7 +35,7 @@ static public class MessagerDevtools
     static public HistoryRecord[] GetMessageHistory() => _records.ToArray();
     static public Dictionary<Type, List<object>> GetSubscriptions() => _subscriptions;
 
-    static public void AddHistoryRecord(Type type, object payload)
+    static public void AddHistoryRecord(Type type, object payload, Action next)
     {
         var sf = new StackTrace().GetFrames();
         var c = sf.Last().GetMethod().DeclaringType.ToString();
@@ -50,16 +50,17 @@ static public class MessagerDevtools
             type: type.ToString(),
             payload: JsonUtility.ToJson(payload, true)
         ));
+        next();
     }
 
-    static public void AddSubscriptionRecord(Type type, object owner)
+    static public void AddSubscriptionRecord(Type type, object owner, Action next)
     {
         if (!_subscriptions.ContainsKey(type))
         {
             _subscriptions.Add(type, new List<object>());
         }
-
         _subscriptions[type].Add(owner);
+        next();
     }
 }
 
