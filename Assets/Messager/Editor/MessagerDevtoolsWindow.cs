@@ -4,6 +4,7 @@ using static UnityEditor.EditorPrefs;
 
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.AnimatedValues;
 
 public sealed class MessagerDevtoolsWindow : EditorWindow
 {
@@ -19,7 +20,8 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
     int _toolbarIndex = 0;
     Vector2 _scrollPosHistory;
     Vector2 _scrollPosSubs;
-    string _subSearch;
+    string _subcribersFilter;
+    string _historyFilter;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void InitMiddlewares()
@@ -38,7 +40,15 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
     {
         var window = GetWindow<MessagerDevtoolsWindow>();
         window.titleContent = new GUIContent("Messager Devtools");
+        window.minSize = new Vector2(400, 300);
         window.Show();
+    }
+
+    [MenuItem("Messager/Close Devtools Window")]
+    static void HideWindow()
+    {
+        var window = GetWindow<MessagerDevtoolsWindow>();
+        window.Close();
     }
 
     [MenuItem(devtoolsMenuName, false, 150)]
@@ -81,8 +91,9 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
     void DrawHistoryTab()
     {
         var history = MessagerDevtools.GetMessageHistory();
-        var width = 300;
 
+        Space(10);
+        DrawSearchField(ref _historyFilter);
         Space(10);
 
         if (history.Length == 0)
@@ -94,21 +105,33 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
             _scrollPosHistory = EditorGUILayout.BeginScrollView(_scrollPosHistory);
             for (int i = 0; i < history.Length; i++)
             {
+                if (!history[i].Type.Contains(_historyFilter))
+                    continue;
+
                 var record = history[i];
 
                 BeginHorizontal();
 
-                record.IsVisible = EditorGUILayout.Foldout(record.IsVisible, record.Time);
-                EditorGUILayout.TextField($"<{record.Type}>", Width(width));
-                EditorGUILayout.TextField(record.Caller, Width(width));
+                var style = new GUIStyle(foldout);
+                style.fontStyle = FontStyle.Bold;
 
+                record.IsVisible = EditorGUILayout.Foldout(record.IsVisible, $" {record.Type}", true, style);
+                EditorGUILayout.TextField(record.Time, Width(76));
                 EndHorizontal();
 
                 if (record.IsVisible)
                 {
+                    EditorGUI.indentLevel++;
                     Space(5);
-                    Label("payload", boldLabel);
-                    TextArea(record.Payload);
+                    EditorGUILayout.LabelField("caller:", boldLabel);
+                    EditorGUILayout.TextField(record.Caller);
+
+                    Space(2);
+
+                    EditorGUILayout.LabelField("payload:", boldLabel);
+                    EditorGUILayout.TextArea(record.Payload);
+                    Space(15);
+                    EditorGUI.indentLevel--;
                 }
 
                 Space(5);
@@ -120,10 +143,10 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
     void DrawSubsTab()
     {
         var spacing = 12;
-        var width = 400;
+        var width = 350;
 
         Space(10);
-        DrawSearchField();
+        DrawSearchField(ref _subcribersFilter);
         Space(10);
 
         if (Application.isPlaying && Messager.DefaultInstance != null)
@@ -132,10 +155,10 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
 
             foreach (var item in MessagerDevtools.GetSubscriptions())
             {
-                if (!item.Key.ToString().Contains(_subSearch))
+                if (!item.Key.ToString().Contains(_subcribersFilter))
                     continue;
 
-                Label($">> {item.Key} ({item.Value.Count})", boldLabel);
+                Label($"• {item.Key} ({item.Value.Count})", boldLabel);
 
                 Space(2);
                 var owners = item.Value.ToArray();
@@ -170,16 +193,14 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
         }
     }
 
-    void DrawSearchField()
+    static void DrawSearchField(ref string search)
     {
-        var width = 60;
-
         BeginHorizontal();
-        Label("Search", boldLabel, Width(width));
-        _subSearch = EditorGUILayout.TextField(_subSearch);
-        if (Button("Clear", Width(width)))
+        Label("Filter", boldLabel, Width(40));
+        search = EditorGUILayout.TextField(search);
+        if (Button("Clear", Width(60)))
         {
-            _subSearch = string.Empty;
+            search = string.Empty;
             GUI.FocusControl("");
         }
         EndHorizontal();

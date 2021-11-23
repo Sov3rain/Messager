@@ -7,11 +7,11 @@ public class SimpleExample : MonoBehaviour
     void Start()
     {
         _messager
-            .Listen<MyMessage>(
+            .Listen<SIMPLE_MESSAGE>(
                 owner: this,
                 (msg) => Debug.Log("Anonymous handler!")
             )
-            .Listen<MyOtherMessage>(
+            .Listen<OTHER_MESSAGE>(
                 owner: this,
                 (msg) => Debug.Log($"Count: {msg.count}")
             );
@@ -20,27 +20,27 @@ public class SimpleExample : MonoBehaviour
     [ContextMenu("Fire Event")]
     void FireEvent()
     {
-        _messager.Dispatch(new MyMessage { count = 100 });
-        _messager.Dispatch(new MyOtherMessage(count: 100));
+        _messager.Dispatch(new SIMPLE_MESSAGE { count = 100 });
+        _messager.Dispatch(new OTHER_MESSAGE(count: 100));
     }
 
     [ContextMenu("Cut")]
     void Cut()
     {
-        _messager.Cut<MyMessage>(this);
+        _messager.Cut<SIMPLE_MESSAGE>(this);
     }
 }
 
-public sealed class MyMessage
+public sealed class SIMPLE_MESSAGE
 {
     public int count;
 }
 
-readonly public struct MyOtherMessage
+readonly public struct OTHER_MESSAGE
 {
     readonly public int count;
 
-    public MyOtherMessage(int count)
+    public OTHER_MESSAGE(int count)
     {
         this.count = count;
     }
