@@ -44,13 +44,6 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
         window.Show();
     }
 
-    [MenuItem("Messager/Close Devtools Window")]
-    static void HideWindow()
-    {
-        var window = GetWindow<MessagerDevtoolsWindow>();
-        window.Close();
-    }
-
     [MenuItem(devtoolsMenuName, false, 150)]
     static void EnableDevtools()
     {
