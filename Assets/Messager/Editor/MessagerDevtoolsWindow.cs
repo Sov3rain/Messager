@@ -98,7 +98,7 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
             _scrollPosHistory = EditorGUILayout.BeginScrollView(_scrollPosHistory);
             for (int i = 0; i < history.Length; i++)
             {
-                if (!history[i].Type.Contains(_historyFilter))
+                if (!string.IsNullOrEmpty(_historyFilter) && !history[i].Type.Contains(_historyFilter))
                     continue;
 
                 var record = history[i];
@@ -148,7 +148,7 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
 
             foreach (var item in MessagerDevtools.GetSubscriptions())
             {
-                if (!item.Key.ToString().Contains(_subcribersFilter))
+                if (!string.IsNullOrEmpty(_subcribersFilter) && !item.Key.ToString().Contains(_subcribersFilter))
                     continue;
 
                 Label($"• {item.Key} ({item.Value.Count})", boldLabel);
