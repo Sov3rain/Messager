@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 public sealed class Messager
@@ -21,11 +20,6 @@ public sealed class Messager
     }
 
     static public Messager DefaultInstance { get; } = new Messager();
-
-    private const string NULL_LISTENER_WARNING =
-        "Messenger: destroyed references of '{0}' are still registered " +
-        "for '{1}' messages. Clear your listeners upon object destruction " +
-        "by calling Cut().";
 
     private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
         = new Dictionary<Type, HashSet<Subscription>>();
@@ -58,9 +52,7 @@ public sealed class Messager
         _listen(typeof(T), owner, () =>
         {
             if (!_subscriptions.ContainsKey(typeof(T)))
-            {
                 _subscriptions.Add(typeof(T), new HashSet<Subscription>());
-            }
 
             Action<object> action = Convert(handler);
             _subscriptions[typeof(T)].Add(new Subscription(owner, action));

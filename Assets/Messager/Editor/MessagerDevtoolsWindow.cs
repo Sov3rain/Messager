@@ -84,6 +84,7 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
     void DrawHistoryTab()
     {
         var history = MessagerDevtools.GetMessageHistory();
+        var width = Screen.width * .6f;
 
         Space(10);
         DrawSearchField(ref _historyFilter);
@@ -116,13 +117,13 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
                 {
                     EditorGUI.indentLevel++;
                     Space(5);
-                    EditorGUILayout.LabelField("caller:", boldLabel);
-                    EditorGUILayout.TextField(record.Caller);
+                    EditorGUILayout.LabelField("caller:", boldLabel, Width(width));
+                    EditorGUILayout.TextField(record.Caller, Width(width));
 
                     Space(2);
 
-                    EditorGUILayout.LabelField("payload:", boldLabel);
-                    EditorGUILayout.TextArea(record.Payload);
+                    EditorGUILayout.LabelField("payload:", boldLabel, Width(width));
+                    EditorGUILayout.TextArea(record.Payload, Width(width));
                     Space(15);
                     EditorGUI.indentLevel--;
                 }
