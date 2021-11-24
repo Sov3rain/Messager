@@ -30,7 +30,8 @@ public sealed class MessagerDevtoolsWindow : EditorWindow
 
         Messager.DefaultInstance.Use(
             onDispatch: MessagerDevtools.AddHistoryRecord,
-            onListen: MessagerDevtools.AddSubscriptionRecord
+            onListen: MessagerDevtools.AddSubscriptionRecord,
+            onCut: MessagerDevtools.RemoveSubscriptionRecord
         );
     }
 

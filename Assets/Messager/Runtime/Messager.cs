@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public sealed class Messager
 {
@@ -28,24 +30,32 @@ public sealed class Messager
     private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
         = new Dictionary<Type, HashSet<Subscription>>();
 
-    private Middleware _dispatchMiddleware = (t, o, next) => next();
-    private Middleware _listenMiddleware = (t, o, next) => next();
+    private Middleware _dispatch = (t, o, next) => next();
+    private Middleware _listen = (t, o, next) => next();
+    private Middleware _cut = (t, o, next) => next();
 
     public void Use(
-        Middleware onDispatch,
-        Middleware onListen
+        Middleware onDispatch = null,
+        Middleware onListen = null,
+        Middleware onCut = null
     )
     {
         if (onDispatch != null)
-            _dispatchMiddleware = onDispatch;
+            _dispatch = onDispatch;
 
         if (onListen != null)
-            _listenMiddleware = onListen;
+            _listen = onListen;
+
+        if (onCut != null)
+            _cut = onCut;
     }
 
     public Messager Listen<T>(object owner, Action<T> handler)
     {
-        _listenMiddleware(typeof(T), owner, () =>
+        Assert.IsNotNull(owner, $"parameter '{nameof(owner)}' cannot be null.");
+        Assert.IsNotNull(handler, $"parameter '{nameof(handler)}' cannot be null.");
+
+        _listen(typeof(T), owner, () =>
         {
             if (!_subscriptions.ContainsKey(typeof(T)))
             {
@@ -60,33 +70,27 @@ public sealed class Messager
 
     public void Cut<T>(object owner)
     {
-        if (!_subscriptions.ContainsKey(typeof(T)))
-            return;
+        Assert.IsNotNull(owner);
 
-        _subscriptions[typeof(T)].RemoveWhere(o => o.Owner == owner);
+        _cut(typeof(T), owner, () =>
+        {
+            if (!_subscriptions.ContainsKey(typeof(T)))
+                return;
+
+            _subscriptions[typeof(T)].RemoveWhere(o => o.Owner == owner);
+        });
     }
 
     public void Dispatch<T>(T payload)
     {
-        _dispatchMiddleware(typeof(T), payload, () =>
+        _dispatch(typeof(T), payload, () =>
         {
-            var actions = new HashSet<Action<T>>();
+            if (!_subscriptions.ContainsKey(typeof(T)))
+                return;
 
-            if (_subscriptions.TryGetValue(typeof(T), out HashSet<Subscription> subs))
-            {
-                // Convert back each action of type object to an action of type T.
-                foreach (Subscription sub in subs)
-                {
-                    if (sub.Owner.Equals(null))
-                    {
-                        Debug.LogWarning(
-                            string.Format(NULL_LISTENER_WARNING, sub.Owner.GetType(), typeof(T))
-                        );
-                        continue;
-                    }
-                    actions.Add(Convert<T>(sub.Action));
-                }
-            }
+            var actions = _subscriptions[typeof(T)]
+                .Where(sub => !sub.Owner.Equals(null))
+                .Select(sub => Convert<T>(sub.Action));
 
             foreach (Action<T> action in actions)
             {
@@ -95,19 +99,9 @@ public sealed class Messager
         });
     }
 
-    Action<T> Convert<T>(Action<object> action)
-    {
-        if (action == null)
-            return null;
+    static Action<T> Convert<T>(Action<object> action) =>
+        new Action<T>(o => action(o));
 
-        return new Action<T>(o => action(o));
-    }
-
-    Action<object> Convert<T>(Action<T> action)
-    {
-        if (action == null)
-            return null;
-
-        return new Action<object>(o => action((T)o));
-    }
+    static Action<object> Convert<T>(Action<T> action) =>
+        new Action<object>(o => action((T)o));
 }

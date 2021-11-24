@@ -62,6 +62,15 @@ static public class MessagerDevtools
         _subscriptions[type].Add(owner);
         next();
     }
+
+    static public void RemoveSubscriptionRecord(Type type, object owner, Action next)
+    {
+        if (!_subscriptions.ContainsKey(type))
+            return;
+
+        _subscriptions[type].Remove(owner);
+        next();
+    }
 }
 
 #endif
