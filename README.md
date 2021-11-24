@@ -195,11 +195,12 @@ Available at runtime only, it will show each type of message used and all the su
 
 #### Methods
 
-| Name                                                   | Description                                                                                           |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `Listen<T>(object owner, Action<T> handler)` | Registers a handler. The type you want to listen for must be passed in the generic parameter.           |
-| `Cut<T>(object owner)`                                 | Remove all handlers owned by the `owner` object for the specified type.                               |
-| `Dispatch<T>(T payload)`                               | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
+| Name                                                         | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `Use(Middleware onDispatch, Middleware onLister, Middleware onCut)` | Initialize middlewares. You can register a delegate matching the following signature: `(Type type, object owner, Action next)` where next is the next function in the delegate. Devtools use this middlewares to get notified about dispatch, listen and cut. |
+| `Listen<T>(object owner, Action<T> handler)`                 | Registers a handler. The type you want to listen for must be passed in the generic parameter. |
+| `Cut<T>(object owner)`                                       | Remove all handlers owned by the `owner` object for the specified type. |
+| `Dispatch<T>(T payload)`                                     | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
 
 ### Messager.Subscription Class
 
