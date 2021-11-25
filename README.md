@@ -10,7 +10,7 @@ This package uses Unity's [scoped registry](https://docs.unity3d.com/Manual/upm-
 
 Add this object to the `scopedRegistries` section:
 
-```
+```json
 {
   "name": "sov3rain",
   "url": "https://registry.npmjs.com",
@@ -20,23 +20,21 @@ Add this object to the `scopedRegistries` section:
 
 Add  this line to the `dependencies` section:
 
-```
-"com.sov3rain.messager": "1.0.0"
+```json
+"com.sov3rain.messager": "1.1.0"
 ```
 
 Your manifest file should look like this now:
 
-```
+```json
 {
-  "scopedRegistries": [
-    {
+  "scopedRegistries": [{
       "name": "sov3rain",
       "url": "https://registry.npmjs.com",
       "scopes": [ "com.sov3rain" ]
-	}
-  ],
+	}],
   "dependencies": {
-    "com.sov3rain.messager": "1.0.0",
+    "com.sov3rain.messager": "1.1.0",
     ...
   }
 }
@@ -64,10 +62,9 @@ private readonly Messenger _messager = Messager.DefaultInstance;
 
 > Note: instantiating your own Messager class could help unit testing or mocking, but for regular use, it's recommended to use the default static instance.
 >
-> `````csharp
-> // Custom instance.
+> ```csharp
 > private readonly Messenger _myMessager = new Messager();
-> `````
+> ```
 
 ### Dispatch a message
 
@@ -195,12 +192,12 @@ Available at runtime only, it will show each type of message used and all the su
 
 #### Methods
 
-| Name                                                         | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Name                                                                | Description                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Use(Middleware onDispatch, Middleware onLister, Middleware onCut)` | Initialize middlewares. You can register a delegate matching the following signature: `(Type type, object owner, Action next)` where next is the next function in the delegate. Devtools use this middlewares to get notified about dispatch, listen and cut. |
-| `Listen<T>(object owner, Action<T> handler)`                 | Registers a handler. The type you want to listen for must be passed in the generic parameter. |
-| `Cut<T>(object owner)`                                       | Remove all handlers owned by the `owner` object for the specified type. |
-| `Dispatch<T>(T payload)`                                     | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
+| `Listen<T>(object owner, Action<T> handler)`                        | Registers a handler. The type you want to listen for must be passed in the generic parameter.                                                                                                                                                                 |
+| `Cut<T>(object owner)`                                              | Remove all handlers owned by the `owner` object for the specified type.                                                                                                                                                                                       |
+| `Dispatch<T>(T payload)`                                            | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter.                                                                                                                                                         |
 
 ### Messager.Subscription Class
 
