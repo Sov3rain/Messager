@@ -45,11 +45,10 @@ Your manifest file should look like this now:
 ## Usage
 ### Create a message
 
-Messages are just plain C# objects. They can be classes or structs. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference. They can also hold data.
+Messages are just plain C# objects. They can be classes or structs. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference.
 
 ```csharp
-// Prefer using structs as message containers.
-public struct MyMessage
+public struct SIMPLE_MESSAGE
 {
     public int Number;
 }
@@ -57,46 +56,48 @@ public struct MyMessage
 
 ### Referencing the messager
 
-You can get a direct reference in any part of your code by accessing the default static instance, or instantiate your own.
+You can get a direct reference in any part of your code by accessing the default static instance:
 
 ```csharp
-// Default static instance
 private readonly Messenger _messager = Messager.DefaultInstance;
-
-// Custom instance.
-private readonly Messenger _myMessager = new Messager();
 ```
 
 > Note: instantiating your own Messager class could help unit testing or mocking, but for regular use, it's recommended to use the default static instance.
+>
+> `````csharp
+> // Custom instance.
+> private readonly Messenger _myMessager = new Messager();
+> `````
 
 ### Dispatch a message
 
 You can dispatch a new message by using the `Dispatch()` method.
 
 ```csharp
-Messager.Dispatch(new MyMessage());
+_messager.Dispatch(new SIMPLE_MESSAGE());
 ```
 
-The message type is inferred by the class instance you create and pass as an argument.
+The message type is inferred by the class instance you pass as an argument.
 
 ### Start listening for a message
 
 Anywhere in any class, you can listen for a message by using the `Listen<T>()` method. The type you want to listen for is specified through the generic type parameter.
 
 ```c#
-Messager.Listen<MyMessage>(this, msg => {
-   Debug.Log("Message incoming!"); 
-});
+_messager.Listen<SIMPLE_MESSAGE>(
+    owner: this, 
+    handler: msg => Debug.Log($"Message incoming: {msg.Number}"); 
+);
 ```
 
-> Note: You can register anonymous functions safely. Because they are bonded to the instance registering (hence the `owner` parameter), they can be destroyed later.
+> Note: You can register anonymous functions safely because they are bonded to the instance registering (hence the `owner` parameter) so they can be removed later.
 
 ### Stop listening for a message
 
-When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object.
+When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object:
 
 ```c#
-Messager.Cut<MyMessage>(this);
+_messager.Cut<SIMPLE_MESSAGE>(this);
 ```
 
 > Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
@@ -104,10 +105,20 @@ Messager.Cut<MyMessage>(this);
 
 ## Good Practices
 
+**DO** name your message objects in a `ALL_UPPER` style to differentiate them from your other classes and structs.
+
+`````csharp
+// Bad.
+public class SimpleMessage { }
+
+// Good.
+public class SIMPLE_MESSAGE { }
+`````
+
 **DO** use immutable objects as messages to avoid side effects:
 
 ```csharp
-public sealed class ImmutableMessage
+public sealed class IMMUTABLE_MESSAGE
 {
     public int Number { get; }
 
@@ -117,7 +128,7 @@ public sealed class ImmutableMessage
     }
 }
 
-public readonly struct ImmutableStructMessage
+public readonly struct IMMUTABLE_STRUCT_MESSAGE
 {
     public readonly int Number;
 
@@ -131,7 +142,7 @@ public readonly struct ImmutableStructMessage
 **DO** cache the message instance if you plan on reusing it multiple times to avoid unnecessary memory allocations:
 
 ```csharp
-MyMessage _msg = new MyMessage(42);
+var _msg = new SIMPLE_MESSAGE { Number = 42 };
 
 // Example code, don't do that.
 void Update()
@@ -140,9 +151,41 @@ void Update()
 }
 ```
 
+## Devtools
+
+Messager comes with a set of devtools to let you better track down message subscriptions and have a timed history of published messages. Devtools are never shipped out in build, you can **only use them in the Editor**.
+
+### Enable devtools
+
+By default devtools are disabled. You can toggle them with the menu bar under `Messager/Enable Devtools`.
+
+### Devtools Window
+
+You can open the devtools window with the menu bar under `Messager/Open Devtools Window`. You can dock the window or use it in floating mode. The window itself has two tabs:
+
+#### Message history
+
+When you dispatch a message in you application code, a timed record will be created and displayed in the history.
+
+![histo-tab](https://i.ibb.co/rkgv6yT/history-tab.jpg)
+
+From here you can see the the type of message, the message timecode (from application start). Will be displayed under the foldout the type of the caller and the calling method, and if the message contains data the json serialiazed payload.
+
+You can filter the history by message type. Names are case sensitive.
+
+#### Subscribers
+
+Available at runtime only, it will show each type of message used and all the subscribers listening to that particular type of message underneath. The number of subscribers will be shown between parentheses. If the subscriber is of type `UnityEngine.Object`, you will be able to click the object field to select the instance in the scene. If the subscriber is not of type `UnityEngine.Object`, you will just see the instance type name.
+
+> Note: if a message has no subscribers at some point, it will not be shown.
+
+![subs-tab](https://i.ibb.co/P5nFPnt/subscribers-tab.jpg)
+
+ You can also filter the list by message type via the search field. Names are case sensitive.
+
 ## API Reference
 
-### Messenger Class
+### Messager Class
 
 #### Properties
 
@@ -152,13 +195,14 @@ void Update()
 
 #### Methods
 
-| Name                                                   | Description                                                                                           |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `Listen<T>(object owner, Action<T> handler)` | Registers a handler. The type you want to listen for must be passed in the generic parameter.           |
-| `Cut<T>(object owner)`                                 | Remove all handlers owned by the `owner` object for the specified type.                               |
-| `Dispatch<T>(T payload)`                               | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
+| Name                                                         | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `Use(Middleware onDispatch, Middleware onLister, Middleware onCut)` | Initialize middlewares. You can register a delegate matching the following signature: `(Type type, object owner, Action next)` where next is the next function in the delegate. Devtools use this middlewares to get notified about dispatch, listen and cut. |
+| `Listen<T>(object owner, Action<T> handler)`                 | Registers a handler. The type you want to listen for must be passed in the generic parameter. |
+| `Cut<T>(object owner)`                                       | Remove all handlers owned by the `owner` object for the specified type. |
+| `Dispatch<T>(T payload)`                                     | Dispatch a new message. The type can be inferred from the instance passed as the `payload` parameter. |
 
-### Message Class
+### Messager.Subscription Class
 
 #### Properties
 
@@ -169,6 +213,7 @@ void Update()
 
 #### Constructors
 
-| Name                                           | Description                                                |
-| ---------------------------------------------- | ---------------------------------------------------------- |
-| `Message(object owner, Action<object> action)` | Default constructor. Sets the owner and action properties. |
+| Name                                                | Description                                                |
+| --------------------------------------------------- | ---------------------------------------------------------- |
+| `Subscription(object owner, Action<object> action)` | Default constructor. Sets the owner and action properties. |
+

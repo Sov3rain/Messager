@@ -2,47 +2,31 @@ using UnityEngine;
 
 public class SimpleExample : MonoBehaviour
 {
-    readonly private Messager _messager = Messager.DefaultInstance;
+    readonly Messager _messager = Messager.DefaultInstance;
 
-    private void Start()
+    void Start()
     {
         _messager
-            .Listen<MyMessage>(
+            .Listen<SIMPLE_MESSAGE>(
                 owner: this,
-                (msg) => Debug.Log("Anonymous handler!")
+                handler: msg => Debug.Log("Anonymous handler!")
             )
-            .Listen<MyOtherMessage>(
+            .Listen<OTHER_MESSAGE>(
                 owner: this,
-                (msg) => Debug.Log($"{msg.count}")
+                handler: msg => Debug.Log($"Count: {msg.count}")
             );
     }
 
     [ContextMenu("Fire Event")]
-    private void FireEvent()
+    void FireEvent()
     {
-        _messager.Dispatch(new MyMessage { count = 100 });
-
-        _messager.Dispatch(new MyOtherMessage(count: 100));
+        _messager.Dispatch(new SIMPLE_MESSAGE { Count = 100 });
+        _messager.Dispatch(new OTHER_MESSAGE(count: 100));
     }
 
     [ContextMenu("Cut")]
-    private void Cut()
+    void Cut()
     {
-        _messager.Cut<MyMessage>(this);
-    }
-}
-
-public sealed class MyMessage
-{
-    public int count;
-}
-
-readonly public struct MyOtherMessage
-{
-    readonly public int count;
-
-    public MyOtherMessage(int count)
-    {
-        this.count = count;
+        _messager.Cut<SIMPLE_MESSAGE>(this);
     }
 }
