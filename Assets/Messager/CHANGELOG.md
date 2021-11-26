@@ -2,7 +2,16 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
-___
+
+## [1.1.0] - 2021-11-26
+
+### Added
+
+- Devtools, see readme for more details.
+
+### Changed
+
+* Update samples and demo scenes.
 
 ## [1.0.0] - 2021-11-02
 
