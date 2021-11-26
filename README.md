@@ -1,6 +1,6 @@
 # Messager
 
-![npm](https://img.shields.io/npm/v/com.sov3rain.messager) ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
+<a href="https://www.npmjs.com/package/com.sov3rain.messager" target="_blank"><img alt="npmjs" src="https://img.shields.io/npm/v/com.sov3rain.messager"></a> ![unity-version](https://img.shields.io/badge/unity-2019.4%2B-lightgrey)
 
 This implementation of the event aggregator pattern tries to overcome the limitations of traditional event handling by providing a central place to publish and subscribe for events. It takes care of registering, unregistering and invoking events and thus decoupling publishers and subscribers.
 
