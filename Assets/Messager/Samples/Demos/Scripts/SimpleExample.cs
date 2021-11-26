@@ -18,7 +18,7 @@ public class SimpleExample : MonoBehaviour
     }
 
     [ContextMenu("Fire Event")]
-    void FireEvent()
+    public void DispatchMessage()
     {
         _messager.Dispatch(new SIMPLE_MESSAGE { Count = 100 });
         _messager.Dispatch(new OTHER_MESSAGE(count: 100));
