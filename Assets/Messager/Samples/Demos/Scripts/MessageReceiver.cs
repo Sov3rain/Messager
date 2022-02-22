@@ -1,15 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class MessageReceiver : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _label;
-
-    readonly Messager _messager = Messager.DefaultInstance;
+    private Text _label;
 
     void Start()
     {
-        _label.SetActive(false);
-        _messager.Listen<SIMPLE_MESSAGE>(this, _ => _label.SetActive(true));
+        _label.text = string.Empty;
+        _label.gameObject.SetActive(false);
+
+        this.Listen<SIMPLE_MESSAGE>(msg =>
+        {
+            _label.text += $"Message received: {msg.Count}\n";
+            _label.gameObject.SetActive(true);
+        });
     }
 }

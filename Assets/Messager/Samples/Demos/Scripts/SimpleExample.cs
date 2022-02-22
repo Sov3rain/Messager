@@ -1,32 +1,16 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SimpleExample : MonoBehaviour
 {
-    readonly Messager _messager = Messager.DefaultInstance;
+    [SerializeField]
+    private Button _dispatchButton, _cutButton;
 
     void Start()
     {
-        _messager
-            .Listen<SIMPLE_MESSAGE>(
-                owner: this,
-                handler: msg => Debug.Log("Anonymous handler!")
-            )
-            .Listen<OTHER_MESSAGE>(
-                owner: this,
-                handler: msg => Debug.Log($"Count: {msg.count}")
-            );
-    }
+        this.Listen<SIMPLE_MESSAGE>(msg => print($"Message received: {msg.Count}"));
 
-    [ContextMenu("Fire Event")]
-    public void DispatchMessage()
-    {
-        _messager.Dispatch(new SIMPLE_MESSAGE { Count = 100 });
-        _messager.Dispatch(new OTHER_MESSAGE(count: 100));
-    }
-
-    [ContextMenu("Cut")]
-    void Cut()
-    {
-        _messager.Cut<SIMPLE_MESSAGE>(this);
+        _dispatchButton.onClick.AddListener(() => this.Dispatch(new SIMPLE_MESSAGE { Count = 42 }));
+        _cutButton.onClick.AddListener(() => this.Cut<SIMPLE_MESSAGE>());
     }
 }

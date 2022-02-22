@@ -41,6 +41,8 @@ Your manifest file should look like this now:
 ```
 
 ## Usage
+Your main access point to the *Messager* is through its abstraction layer, which uses extension methods. This methods are available from any `object` by using the `this` keyword. From here you can access the three primary methods: `Listen()`, `Dispatch()` and `Cut()`.
+
 ### Create a message
 
 Messages are just plain C# objects. They can be classes or structs. They serve the purpose of creating a unique signature by enforcing Type reference instead of string reference.
@@ -52,12 +54,45 @@ public struct SIMPLE_MESSAGE
 }
 ```
 
-### Referencing the messager
+### Dispatch a message
 
-You can get a direct reference in any part of your code by accessing the default static instance:
+You can dispatch a new message by using the `Dispatch()` extension method.
 
 ```csharp
-private readonly Messenger _messager = Messager.DefaultInstance;
+this.Dispatch(new SIMPLE_MESSAGE { Number: 42 });
+```
+
+The message type is inferred by the class instance you pass as an argument.
+
+### Start listening for a message
+
+Anywhere in any class, you can listen for a message by using the `Listen<T>()` extension method.  The type you want to listen for is specified through the generic type parameter.
+
+```c#
+this.Listen<SIMPLE_MESSAGE>(msg => print($"Message incoming: {msg.Number}"));
+```
+
+> Note: You can register anonymous functions safely because they are bonded to the instance registering, so they can be removed later.
+
+### Stop listening for a message
+
+When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object:
+
+```c#
+this.Cut<SIMPLE_MESSAGE>();
+```
+
+> Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
+> Note 2: remember to always call `Cut()` before destroying an object instance that is still listening to messages to avoid memory leaks.
+
+## Advanced Usage
+
+### Referencing the messager
+
+In order to reduce boilerplate code and clutter, *Messager* comes with extension methods. You can still get a direct reference in any part of your code by accessing the default static instance:
+
+```csharp
+private readonly Messager _messager = Messager.DefaultInstance;
 ```
 
 > Note: instantiating your own Messager class could help unit testing or mocking, but for regular use, it's recommended to use the default static instance.
@@ -66,39 +101,28 @@ private readonly Messenger _messager = Messager.DefaultInstance;
 > private readonly Messenger _myMessager = new Messager();
 > ```
 
-### Dispatch a message
-
-You can dispatch a new message by using the `Dispatch()` method.
-
+Then use that specific reference to add you listener and dispatch messages like with extension methods:
 ```csharp
-_messager.Dispatch(new SIMPLE_MESSAGE());
-```
+// Dispatch
+_messager.Dispatch(new SIMPLE_MESSAGE { Number: 42 });
 
-The message type is inferred by the class instance you pass as an argument.
-
-### Start listening for a message
-
-Anywhere in any class, you can listen for a message by using the `Listen<T>()` method. The type you want to listen for is specified through the generic type parameter.
-
-```c#
+// Listen
 _messager.Listen<SIMPLE_MESSAGE>(
     owner: this, 
-    handler: msg => Debug.Log($"Message incoming: {msg.Number}"); 
+    handler: msg => print($"Message incoming: {msg.Number}");
 );
-```
 
-> Note: You can register anonymous functions safely because they are bonded to the instance registering (hence the `owner` parameter) so they can be removed later.
-
-### Stop listening for a message
-
-When you want to stop being notified when a type of message is dispatched, you can call `Cut()` to unregister the object:
-
-```c#
+// Cut
 _messager.Cut<SIMPLE_MESSAGE>(this);
 ```
 
-> Note: when using `Cut`, all listeners registered for that object are removed, as they are referenced by owner.
-> Note 2: remember to always call `Cut()` before destroying an object instance that is still listening to messages.
+### Changing the Messager instance
+
+You can change the instance of *Messager* that will be used by the extension methods by accessing the property `Instance` like so:
+
+```c#
+MessagerExtensions.Instance = _myMessager; // Add your custom instance here
+```
 
 ## Good Practices
 
@@ -119,17 +143,17 @@ public sealed class IMMUTABLE_MESSAGE
 {
     public int Number { get; }
 
-    public ImmutableMessage(int number)
+    public IMMUTABLE_MESSAGE(int number)
     {
         Number = number;
     }
 }
 
-public readonly struct IMMUTABLE_STRUCT_MESSAGE
+public struct IMMUTABLE_STRUCT_MESSAGE
 {
-    public readonly int Number;
+    public int Number { get; }
 
-    public ImmutableStructMessage(int number)
+    public IMMUTABLE_STRUCT_MESSAGE(int number)
     {
         Number = number;
     }
