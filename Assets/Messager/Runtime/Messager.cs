@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Assertions;
 
 public sealed class Messager
 {
-    public delegate void Middleware(Type type, object owner, Action next);
+    public delegate void Middleware(Context ctx, Action next);
+
+    public sealed class Context
+    {
+        public Type Type { get; set; }
+        public object Obj { get; set; }
+
+        public Context(Type type, object obj) =>
+            (Type, Obj) = (type, obj);
+
+        public void Deconstruct(out Type type, out object obj)
+        {
+            type = Type;
+            obj = Obj;
+        }
+    }
 
     public sealed class Subscription
     {
@@ -24,9 +38,9 @@ public sealed class Messager
     private readonly Dictionary<Type, HashSet<Subscription>> _subscriptions
         = new Dictionary<Type, HashSet<Subscription>>();
 
-    private Middleware _dispatch = (t, o, next) => next();
-    private Middleware _listen = (t, o, next) => next();
-    private Middleware _cut = (t, o, next) => next();
+    private Middleware _dispatch = (ctx, next) => next();
+    private Middleware _listen = (ctx, next) => next();
+    private Middleware _cut = (ctx, next) => next();
 
     public void Use(
         Middleware onDispatch = null,
@@ -49,7 +63,8 @@ public sealed class Messager
         Assert.IsNotNull(owner, $"parameter '{nameof(owner)}' cannot be null.");
         Assert.IsNotNull(handler, $"parameter '{nameof(handler)}' cannot be null.");
 
-        _listen(typeof(T), owner, () =>
+        var ctx = new Context(typeof(T), owner);
+        _listen(ctx, () =>
         {
             if (!_subscriptions.ContainsKey(typeof(T)))
                 _subscriptions.Add(typeof(T), new HashSet<Subscription>());
@@ -64,7 +79,8 @@ public sealed class Messager
     {
         Assert.IsNotNull(owner);
 
-        _cut(typeof(T), owner, () =>
+        var ctx = new Context(typeof(T), owner);
+        _cut(ctx, () =>
         {
             if (!_subscriptions.ContainsKey(typeof(T)))
                 return;
@@ -75,19 +91,21 @@ public sealed class Messager
 
     public void Dispatch<T>(T payload)
     {
-        _dispatch(typeof(T), payload, () =>
+        var ctx = new Context(typeof(T), payload);
+        _dispatch(ctx, () =>
         {
             if (!_subscriptions.ContainsKey(typeof(T)))
                 return;
 
-            var actions = _subscriptions[typeof(T)]
-                .Where(sub => !sub.Owner.Equals(null))
-                .Select(sub => Convert<T>(sub.Action));
+            var actions = new HashSet<Action<T>>();
+            foreach (var sub in _subscriptions[typeof(T)])
+            {
+                if (!sub.Owner.Equals(null))
+                    actions.Add(Convert<T>(sub.Action));
+            }
 
             foreach (Action<T> action in actions)
-            {
                 action(payload);
-            }
         });
     }
 

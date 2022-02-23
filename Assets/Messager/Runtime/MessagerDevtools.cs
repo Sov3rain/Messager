@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 
+using static Messager;
+
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -35,8 +37,9 @@ static public class MessagerDevtools
     static public HistoryRecord[] GetMessageHistory() => _records.ToArray();
     static public Dictionary<Type, List<object>> GetSubscriptions() => _subscriptions;
 
-    static public void AddHistoryRecord(Type type, object payload, Action next)
+    static public void AddHistoryRecord(Context ctx, Action next)
     {
+        var (type, payload) = ctx;
         var sf = new StackTrace().GetFrames();
         var c = sf.Last().GetMethod().DeclaringType.ToString();
         var m = sf.Last().GetMethod().Name;
@@ -53,18 +56,21 @@ static public class MessagerDevtools
         next();
     }
 
-    static public void AddSubscriptionRecord(Type type, object owner, Action next)
+    static public void AddSubscriptionRecord(Context ctx, Action next)
     {
+        var (type, owner) = ctx;
+
         if (!_subscriptions.ContainsKey(type))
-        {
             _subscriptions.Add(type, new List<object>());
-        }
+
         _subscriptions[type].Add(owner);
         next();
     }
 
-    static public void RemoveSubscriptionRecord(Type type, object owner, Action next)
+    static public void RemoveSubscriptionRecord(Context ctx, Action next)
     {
+        var (type, owner) = ctx;
+
         if (!_subscriptions.ContainsKey(type))
             return;
 
